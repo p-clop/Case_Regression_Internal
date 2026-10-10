@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "validation": "structure",
+  "cases": [
+    {
+      "id": "C01_global",
+      "directory": "cases/C01_global"
+    },
+    {
+      "id": "C02_thread_argument",
+      "directory": "cases/C02_thread_argument"
+    },
+    {
+      "id": "C03_heap_escape",
+      "directory": "cases/C03_heap_escape"
+    },
+    {
+      "id": "C04_struct_fields",
+      "directory": "cases/C04_struct_fields"
+    },
+    {
+      "id": "C05_pointer_alias",
+      "directory": "cases/C05_pointer_alias"
+    },
+    {
+      "id": "C06_helper_function",
+      "directory": "cases/C06_helper_function"
+    },
+    {
+      "id": "C07_two_objects",
+      "directory": "cases/C07_two_objects"
+    },
+    {
+      "id": "C08_unrelated_code",
+      "directory": "cases/C08_unrelated_code"
+    }
+  ]
+}

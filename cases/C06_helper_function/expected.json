@@ -1,0 +1,120 @@
+{
+  "schema_version": 2,
+  "id": "C06_helper_function",
+  "validation": "structure",
+  "objects": [
+    {
+      "id": "shared",
+      "type": "int",
+      "initial": 0,
+      "origin": "global"
+    }
+  ],
+  "shared_objects": [
+    "shared"
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "shared",
+          "ordering": "plain",
+          "function": "helper_write",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "shared",
+          "ordering": "plain",
+          "function": "helper_read"
+        }
+      ]
+    }
+  ],
+  "seed_objects": [
+    "shared"
+  ],
+  "outcome": [],
+  "slice": {
+    "retained_events": [
+      "T0:E0",
+      "T1:E0"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "unit": {
+    "objects": [
+      "shared"
+    ],
+    "threads": [
+      {
+        "id": "T0",
+        "entry": "writer",
+        "events": [
+          "T0:E0"
+        ]
+      },
+      {
+        "id": "T1",
+        "entry": "reader",
+        "events": [
+          "T1:E0"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "kind": "communication_candidate",
+        "from": "T0:E0",
+        "to": "T1:E0"
+      }
+    ],
+    "outcome": [],
+    "bindings": [],
+    "calls": [
+      {
+        "thread": "T0",
+        "caller": "writer",
+        "callee": "helper_write"
+      },
+      {
+        "thread": "T1",
+        "caller": "reader",
+        "callee": "helper_read"
+      }
+    ]
+  },
+  "bindings": [],
+  "calls": [
+    {
+      "thread": "T0",
+      "caller": "writer",
+      "callee": "helper_write"
+    },
+    {
+      "thread": "T1",
+      "caller": "reader",
+      "callee": "helper_read"
+    }
+  ],
+  "excluded_objects": [],
+  "expected_observations": {
+    "x86": "UNKNOWN",
+    "riscv": "UNKNOWN"
+  },
+  "scope": "static_structure_only",
+  "notes": "Independent manual structural oracle; plain shared accesses may race in C. ",
+  "assumptions": []
+}

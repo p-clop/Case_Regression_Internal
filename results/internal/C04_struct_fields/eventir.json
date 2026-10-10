@@ -1,0 +1,107 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/C04_struct_fields/case.c"
+  },
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "state.data",
+          "ordering": "plain",
+          "source_location": {
+            "line": 8,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        },
+        {
+          "id": "T0:E1",
+          "kind": "Store",
+          "object": "state.flag",
+          "ordering": "plain",
+          "source_location": {
+            "line": 9,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "state.flag",
+          "ordering": "plain",
+          "source_location": {
+            "line": 15,
+            "column": 21
+          },
+          "function": "reader",
+          "target": "r0"
+        },
+        {
+          "id": "T1:E1",
+          "kind": "Load",
+          "object": "state.data",
+          "ordering": "plain",
+          "source_location": {
+            "line": 16,
+            "column": 21
+          },
+          "function": "reader",
+          "target": "r1"
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "state.data",
+      "type": "int",
+      "initial": 0,
+      "origin": "global",
+      "base_object": "state",
+      "field_path": [
+        "data"
+      ],
+      "source_location": {
+        "line": 3,
+        "column": 20
+      }
+    },
+    {
+      "id": "state.flag",
+      "type": "int",
+      "initial": 0,
+      "origin": "global",
+      "base_object": "state",
+      "field_path": [
+        "flag"
+      ],
+      "source_location": {
+        "line": 3,
+        "column": 30
+      }
+    }
+  ],
+  "bindings": [],
+  "calls": [],
+  "assumptions": [],
+  "diagnostics": [
+    "Static bounded extraction assumes every pthread_create succeeds and all created workers can overlap.",
+    "Plain shared int accesses describe hardware events; this does not establish defined C behavior or absence of data races."
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "schema_version": 2,
+  "id": "C03_heap_escape",
+  "validation": "structure",
+  "objects": [
+    {
+      "id": "heap_value",
+      "type": "int",
+      "initial": 0,
+      "origin": "heap_escape",
+      "allocation_site": {
+        "id": "main:malloc:0",
+        "function": "main"
+      }
+    }
+  ],
+  "shared_objects": [
+    "heap_value"
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "heap_value",
+          "ordering": "plain",
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "heap_value",
+          "ordering": "plain",
+          "function": "reader"
+        }
+      ]
+    }
+  ],
+  "seed_objects": [
+    "heap_value"
+  ],
+  "outcome": [],
+  "slice": {
+    "retained_events": [
+      "T0:E0",
+      "T1:E0"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "unit": {
+    "objects": [
+      "heap_value"
+    ],
+    "threads": [
+      {
+        "id": "T0",
+        "entry": "writer",
+        "events": [
+          "T0:E0"
+        ]
+      },
+      {
+        "id": "T1",
+        "entry": "reader",
+        "events": [
+          "T1:E0"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "kind": "communication_candidate",
+        "from": "T0:E0",
+        "to": "T1:E0"
+      }
+    ],
+    "outcome": [],
+    "bindings": [
+      {
+        "kind": "thread_argument",
+        "thread": "T0",
+        "function": "writer",
+        "name": "arg",
+        "object": "heap_value"
+      },
+      {
+        "kind": "pointer_alias",
+        "thread": "T0",
+        "function": "writer",
+        "name": "p",
+        "object": "heap_value"
+      },
+      {
+        "kind": "thread_argument",
+        "thread": "T1",
+        "function": "reader",
+        "name": "arg",
+        "object": "heap_value"
+      },
+      {
+        "kind": "pointer_alias",
+        "thread": "T1",
+        "function": "reader",
+        "name": "p",
+        "object": "heap_value"
+      }
+    ],
+    "calls": []
+  },
+  "bindings": [
+    {
+      "kind": "thread_argument",
+      "thread": "T0",
+      "function": "writer",
+      "name": "arg",
+      "object": "heap_value"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T0",
+      "function": "writer",
+      "name": "p",
+      "object": "heap_value"
+    },
+    {
+      "kind": "thread_argument",
+      "thread": "T1",
+      "function": "reader",
+      "name": "arg",
+      "object": "heap_value"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T1",
+      "function": "reader",
+      "name": "p",
+      "object": "heap_value"
+    }
+  ],
+  "calls": [],
+  "excluded_objects": [],
+  "expected_observations": {
+    "x86": "UNKNOWN",
+    "riscv": "UNKNOWN"
+  },
+  "scope": "static_structure_only",
+  "notes": "Independent manual structural oracle; plain shared accesses may race in C. Analyze the successful-allocation path only: the int is initialized before creation; free occurs after both joins. Allocation failure starts no workers.",
+  "assumptions": [
+    {
+      "kind": "allocation_succeeded",
+      "allocation_site": "main:malloc:0"
+    }
+  ]
+}

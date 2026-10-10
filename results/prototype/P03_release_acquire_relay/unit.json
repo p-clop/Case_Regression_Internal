@@ -1,0 +1,235 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/P03_release_acquire_relay/case.c"
+  },
+  "shared_objects": [
+    "data",
+    "flag",
+    "relay_flag"
+  ],
+  "seed_objects": [
+    "data"
+  ],
+  "objects": [
+    {
+      "id": "data",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 4,
+        "column": 13
+      }
+    },
+    {
+      "id": "flag",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 5,
+        "column": 13
+      }
+    },
+    {
+      "id": "relay_flag",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 6,
+        "column": 13
+      }
+    }
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "data",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 9,
+            "column": 5
+          },
+          "function": "publish_data",
+          "value": 1
+        },
+        {
+          "id": "T0:E1",
+          "kind": "Store",
+          "object": "flag",
+          "ordering": "release",
+          "source_location": {
+            "line": 10,
+            "column": 5
+          },
+          "function": "publish_data",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "relay",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "flag",
+          "ordering": "acquire",
+          "source_location": {
+            "line": 14,
+            "column": 16
+          },
+          "function": "relay_once",
+          "target": "r0"
+        },
+        {
+          "id": "T1:E1",
+          "kind": "Store",
+          "object": "relay_flag",
+          "ordering": "release",
+          "source_location": {
+            "line": 15,
+            "column": 5
+          },
+          "function": "relay_once",
+          "value": {
+            "event": "T1:E0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "index": 2,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T2:E0",
+          "kind": "Load",
+          "object": "relay_flag",
+          "ordering": "acquire",
+          "source_location": {
+            "line": 19,
+            "column": 17
+          },
+          "function": "observe_data",
+          "target": "r0"
+        },
+        {
+          "id": "T2:E1",
+          "kind": "Load",
+          "object": "data",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 20,
+            "column": 19
+          },
+          "function": "observe_data",
+          "target": "r1"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "kind": "po",
+      "from": "T0:E0",
+      "to": "T0:E1"
+    },
+    {
+      "kind": "po",
+      "from": "T1:E0",
+      "to": "T1:E1"
+    },
+    {
+      "kind": "data",
+      "from": "T1:E0",
+      "to": "T1:E1"
+    },
+    {
+      "kind": "po",
+      "from": "T2:E0",
+      "to": "T2:E1"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E0",
+      "to": "T2:E1"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E1",
+      "to": "T1:E0"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T1:E1",
+      "to": "T2:E0"
+    }
+  ],
+  "bindings": [],
+  "calls": [
+    {
+      "thread": "T0",
+      "caller": "writer",
+      "callee": "publish_data"
+    },
+    {
+      "thread": "T1",
+      "caller": "relay",
+      "callee": "relay_once"
+    },
+    {
+      "thread": "T2",
+      "caller": "reader",
+      "callee": "observe_data"
+    }
+  ],
+  "assumptions": [],
+  "outcome": [
+    {
+      "thread": 1,
+      "event": "T1:E0",
+      "value": 1
+    },
+    {
+      "thread": 2,
+      "event": "T2:E0",
+      "value": 1
+    },
+    {
+      "thread": 2,
+      "event": "T2:E1",
+      "value": 0
+    }
+  ],
+  "slice": {
+    "strategy": "conservative_shared_object_thread_closure",
+    "retained_events": [
+      "T0:E0",
+      "T0:E1",
+      "T1:E0",
+      "T1:E1",
+      "T2:E0",
+      "T2:E1"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "scope": "hardware_projection_of_bounded_source_events",
+  "limitations": [
+    "C data-race freedom and full compiler correctness are not proved.",
+    "Communication candidates are not established reads-from or synchronization edges.",
+    "pthread creation succeeds; workers run once; startup/join occur outside the projected threads."
+  ]
+}

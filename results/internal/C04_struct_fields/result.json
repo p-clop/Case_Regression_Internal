@@ -1,0 +1,57 @@
+{
+  "case": "C04_struct_fields",
+  "status": "PASS",
+  "scope": "structure_only",
+  "checks": {
+    "shared_objects": {
+      "status": "PASS",
+      "errors": []
+    },
+    "events": {
+      "status": "PASS",
+      "errors": []
+    },
+    "slice": {
+      "status": "PASS",
+      "errors": []
+    },
+    "verification_unit": {
+      "status": "PASS",
+      "errors": []
+    },
+    "bindings": {
+      "status": "PASS",
+      "errors": []
+    }
+  },
+  "verification": {
+    "x86": {
+      "status": "UNKNOWN",
+      "reason": "no_reviewed_model_oracle"
+    },
+    "riscv": {
+      "status": "UNKNOWN",
+      "reason": "no_reviewed_model_oracle"
+    }
+  },
+  "output": "results/internal/C04_struct_fields",
+  "artifacts": {
+    "source.ll": "273c2971c7e4f15d8fce378c87b1a312ee28a138883f648382f5e738c46fc0df",
+    "eventir.json": "9cd971ed77e799eac47a0abd8d76e05687a44ddc54b8a769b596384d08cd5f2a",
+    "unit.json": "b6444553860c806a1d0b6eb25b2469aed8f1dd9739db12b6c314790eb565e9ea",
+    "slice.json": "500277a70be6412268af584076440d1a579f95200346f0b8b1098ae3c5067095"
+  },
+  "provenance": {
+    "source_sha256": "847a584ee999df3c8bdf744e8c7e438ac642b6591c4972059a9b22023fad128f",
+    "oracle_sha256": "30587fd42e85a871125a5fc6d944287cc10c73650877bb1345cd23762027877e",
+    "clang": "/home/zhovy/work/Case_Regression_Internal/../.tools/clang18/bin/clang",
+    "mode": "extract"
+  },
+  "errors": [],
+  "counts": {
+    "shared_objects": 2,
+    "events": 4,
+    "retained_events": 4,
+    "removed_events": 0
+  }
+}

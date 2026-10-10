@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "P01_pthread_sb",
+  "label": "Ordinary pthread store buffering with irrelevant private noise",
+  "seed_objects": ["x"],
+  "shared_objects": ["x", "y"],
+  "objects": [
+    {"id": "x", "type": "int", "initial": 0},
+    {"id": "y", "type": "int", "initial": 0},
+    {"id": "private_noise", "type": "int", "initial": 0}
+  ],
+  "slice_objects": ["x", "y"],
+  "removed_objects": ["private_noise"],
+  "threads": [
+    {
+      "entry": "writer",
+      "events": [
+        {"kind": "Store", "object": "x", "ordering": "plain", "value": 1},
+        {"kind": "Load", "object": "y", "ordering": "plain"},
+        {"kind": "Store", "object": "private_noise", "ordering": "plain", "value": 7}
+      ]
+    },
+    {
+      "entry": "reader",
+      "events": [
+        {"kind": "Store", "object": "y", "ordering": "plain", "value": 1},
+        {"kind": "Load", "object": "x", "ordering": "plain"}
+      ]
+    }
+  ],
+  "outcome": [
+    {"thread": 0, "object": "y", "occurrence": 0, "value": 0},
+    {"thread": 1, "object": "x", "occurrence": 0, "value": 0}
+  ],
+  "expected_observations": {"x86": "Sometimes", "riscv": "Sometimes"},
+  "scope": "hardware_projection",
+  "notes": "Manually authored oracle. The input has C data races. The outcome describes only the explicitly generated architecture litmus, not permitted behavior of a compiled C program. private_noise is accessed by only one worker and does not influence retained accesses."
+}

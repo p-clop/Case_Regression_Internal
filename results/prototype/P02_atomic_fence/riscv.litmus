@@ -1,0 +1,18 @@
+RISCV P02_atomic_fence_riscv
+
+{
+  x=0;
+  y=0;
+  0:x1=x;
+  0:x2=y;
+  1:x1=x;
+  1:x2=y;
+}
+
+P0 | P1 ;
+li x31,1 | li x31,1 ;
+sw x31,0(x1) | sw x31,0(x2) ;
+fence rw,rw | fence rw,rw ;
+lw x11,0(x2) | lw x11,0(x1) ;
+
+exists (0:x11=0 /\ 1:x11=0)

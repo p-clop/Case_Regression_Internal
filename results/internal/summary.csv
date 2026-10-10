@@ -1,0 +1,9 @@
+﻿case,shared_objects,events,slice,verification_unit,bindings,equivalence,retained_events,removed_events,structure_status,x86_model,riscv_model,reason
+C01_global,PASS,PASS,PASS,PASS,PASS,N/A,2,0,PASS,UNKNOWN,UNKNOWN,
+C02_thread_argument,PASS,PASS,PASS,PASS,PASS,N/A,2,0,PASS,UNKNOWN,UNKNOWN,
+C03_heap_escape,PASS,PASS,PASS,PASS,PASS,N/A,2,0,PASS,UNKNOWN,UNKNOWN,
+C04_struct_fields,PASS,PASS,PASS,PASS,PASS,N/A,4,0,PASS,UNKNOWN,UNKNOWN,
+C05_pointer_alias,PASS,PASS,PASS,PASS,PASS,N/A,2,0,PASS,UNKNOWN,UNKNOWN,
+C06_helper_function,PASS,PASS,PASS,PASS,PASS,N/A,2,0,PASS,UNKNOWN,UNKNOWN,
+C07_two_objects,PASS,PASS,PASS,PASS,PASS,N/A,4,0,PASS,UNKNOWN,UNKNOWN,
+C08_unrelated_code,PASS,PASS,PASS,PASS,PASS,PASS,4,1,PASS,UNKNOWN,UNKNOWN,

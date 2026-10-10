@@ -1,0 +1,13 @@
+Test P02_atomic_fence_riscv Allowed
+States 3
+0:x11=0; 1:x11=1;
+0:x11=1; 1:x11=0;
+0:x11=1; 1:x11=1;
+No
+Witnesses
+Positive: 0 Negative: 3
+Condition exists (0:x11=0 /\ 1:x11=0)
+Observation P02_atomic_fence_riscv Never 0 3
+Time P02_atomic_fence_riscv 0.00
+Hash=b7c4c0c69d88a82cba81257522743214
+

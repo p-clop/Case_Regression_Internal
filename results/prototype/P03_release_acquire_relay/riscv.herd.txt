@@ -1,0 +1,15 @@
+Test P03_release_acquire_relay_riscv Allowed
+States 5
+1:x11=0; 2:x11=0; 2:x12=0;
+1:x11=0; 2:x11=0; 2:x12=1;
+1:x11=1; 2:x11=0; 2:x12=0;
+1:x11=1; 2:x11=0; 2:x12=1;
+1:x11=1; 2:x11=1; 2:x12=1;
+No
+Witnesses
+Positive: 0 Negative: 7
+Condition exists (1:x11=1 /\ 2:x11=1 /\ 2:x12=0)
+Observation P03_release_acquire_relay_riscv Never 0 7
+Time P03_release_acquire_relay_riscv 0.00
+Hash=be61538f83913738ded52f835f7125eb
+

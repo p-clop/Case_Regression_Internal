@@ -1,0 +1,161 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/C04_struct_fields/case.c"
+  },
+  "shared_objects": [
+    "state.data",
+    "state.flag"
+  ],
+  "seed_objects": [
+    "state.flag"
+  ],
+  "objects": [
+    {
+      "id": "state.data",
+      "type": "int",
+      "initial": 0,
+      "origin": "global",
+      "base_object": "state",
+      "field_path": [
+        "data"
+      ],
+      "source_location": {
+        "line": 3,
+        "column": 20
+      }
+    },
+    {
+      "id": "state.flag",
+      "type": "int",
+      "initial": 0,
+      "origin": "global",
+      "base_object": "state",
+      "field_path": [
+        "flag"
+      ],
+      "source_location": {
+        "line": 3,
+        "column": 30
+      }
+    }
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "state.data",
+          "ordering": "plain",
+          "source_location": {
+            "line": 8,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        },
+        {
+          "id": "T0:E1",
+          "kind": "Store",
+          "object": "state.flag",
+          "ordering": "plain",
+          "source_location": {
+            "line": 9,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "state.flag",
+          "ordering": "plain",
+          "source_location": {
+            "line": 15,
+            "column": 21
+          },
+          "function": "reader",
+          "target": "r0"
+        },
+        {
+          "id": "T1:E1",
+          "kind": "Load",
+          "object": "state.data",
+          "ordering": "plain",
+          "source_location": {
+            "line": 16,
+            "column": 21
+          },
+          "function": "reader",
+          "target": "r1"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "kind": "po",
+      "from": "T0:E0",
+      "to": "T0:E1"
+    },
+    {
+      "kind": "po",
+      "from": "T1:E0",
+      "to": "T1:E1"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E0",
+      "to": "T1:E1"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E1",
+      "to": "T1:E0"
+    }
+  ],
+  "bindings": [],
+  "calls": [],
+  "assumptions": [],
+  "outcome": [
+    {
+      "thread": 1,
+      "event": "T1:E0",
+      "value": 1
+    },
+    {
+      "thread": 1,
+      "event": "T1:E1",
+      "value": 0
+    }
+  ],
+  "slice": {
+    "strategy": "conservative_shared_object_thread_closure",
+    "retained_events": [
+      "T0:E0",
+      "T0:E1",
+      "T1:E0",
+      "T1:E1"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "scope": "hardware_projection_of_bounded_source_events",
+  "limitations": [
+    "C data-race freedom and full compiler correctness are not proved.",
+    "Communication candidates are not established reads-from or synchronization edges.",
+    "pthread creation succeeds; workers run once; startup/join occur outside the projected threads."
+  ]
+}

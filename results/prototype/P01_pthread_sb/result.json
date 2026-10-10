@@ -1,0 +1,55 @@
+{
+  "case": "P01_pthread_sb",
+  "status": "PASS",
+  "structure": {
+    "status": "PASS",
+    "errors": [],
+    "shared_objects": [
+      "x",
+      "y"
+    ],
+    "retained_events": 4,
+    "removed_events": 1
+  },
+  "verification": {
+    "x86": {
+      "status": "PASS",
+      "observation": "Sometimes",
+      "expected": "Sometimes",
+      "reason": null,
+      "returncode": 0,
+      "command": [
+        "/home/zhovy/.opam/rver-758/bin/herd7",
+        "-model",
+        "/home/zhovy/.opam/rver-758/share/herdtools7/herd/x86tso.cat",
+        "results/prototype/P01_pthread_sb/x86.litmus"
+      ],
+      "model_sha256": "c3858187ba502010e8dfe50e262daf828ac49b150be38032f719e0baf644a3a3",
+      "log": "results/prototype/P01_pthread_sb/x86.herd.txt"
+    },
+    "riscv": {
+      "status": "PASS",
+      "observation": "Sometimes",
+      "expected": "Sometimes",
+      "reason": null,
+      "returncode": 0,
+      "command": [
+        "/home/zhovy/.opam/rver-758/bin/herd7",
+        "-model",
+        "/home/zhovy/.opam/rver-758/share/herdtools7/herd/riscv.cat",
+        "results/prototype/P01_pthread_sb/riscv.litmus"
+      ],
+      "model_sha256": "7a579ee7cf4c33d3ab80ddf517e6f0b71fb427b624c92287e4e7284d962d2260",
+      "log": "results/prototype/P01_pthread_sb/riscv.herd.txt"
+    }
+  },
+  "output": "results/prototype/P01_pthread_sb",
+  "scope": "hardware_projection_of_bounded_source_events",
+  "provenance": {
+    "source_sha256": "6d3751c7f04af164376c6f4a78fad64e97630b329c7cc66323dc9fe8e3f8f3bf",
+    "oracle_sha256": "e65b6fb3213f7b72db150e4d0c9f67fadbc2bb8def08cd78533548742d8d6b2f",
+    "clang": "/home/zhovy/work/Case_Regression_Internal/../.tools/clang18/bin/clang",
+    "herd7": "/home/zhovy/.opam/rver-758/bin/herd7",
+    "llvm_ir_sha256": "9991ba5af7aaf3306051a2b91f92c99531445c24ef5e52e9c659c16c47e2e24e"
+  }
+}

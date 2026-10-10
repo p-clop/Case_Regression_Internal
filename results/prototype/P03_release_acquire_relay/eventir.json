@@ -1,0 +1,158 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/P03_release_acquire_relay/case.c"
+  },
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "data",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 9,
+            "column": 5
+          },
+          "function": "publish_data",
+          "value": 1
+        },
+        {
+          "id": "T0:E1",
+          "kind": "Store",
+          "object": "flag",
+          "ordering": "release",
+          "source_location": {
+            "line": 10,
+            "column": 5
+          },
+          "function": "publish_data",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "relay",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "flag",
+          "ordering": "acquire",
+          "source_location": {
+            "line": 14,
+            "column": 16
+          },
+          "function": "relay_once",
+          "target": "r0"
+        },
+        {
+          "id": "T1:E1",
+          "kind": "Store",
+          "object": "relay_flag",
+          "ordering": "release",
+          "source_location": {
+            "line": 15,
+            "column": 5
+          },
+          "function": "relay_once",
+          "value": {
+            "event": "T1:E0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "index": 2,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T2:E0",
+          "kind": "Load",
+          "object": "relay_flag",
+          "ordering": "acquire",
+          "source_location": {
+            "line": 19,
+            "column": 17
+          },
+          "function": "observe_data",
+          "target": "r0"
+        },
+        {
+          "id": "T2:E1",
+          "kind": "Load",
+          "object": "data",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 20,
+            "column": 19
+          },
+          "function": "observe_data",
+          "target": "r1"
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "data",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 4,
+        "column": 13
+      }
+    },
+    {
+      "id": "flag",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 5,
+        "column": 13
+      }
+    },
+    {
+      "id": "relay_flag",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 6,
+        "column": 13
+      }
+    }
+  ],
+  "bindings": [],
+  "calls": [
+    {
+      "thread": "T0",
+      "caller": "writer",
+      "callee": "publish_data"
+    },
+    {
+      "thread": "T1",
+      "caller": "relay",
+      "callee": "relay_once"
+    },
+    {
+      "thread": "T2",
+      "caller": "reader",
+      "callee": "observe_data"
+    }
+  ],
+  "assumptions": [],
+  "diagnostics": [
+    "Static bounded extraction assumes every pthread_create succeeds and all created workers can overlap.",
+    "Plain shared int accesses describe hardware events; this does not establish defined C behavior or absence of data races."
+  ]
+}

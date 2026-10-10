@@ -1,0 +1,9 @@
+{
+  "strategy": "conservative_shared_object_thread_closure",
+  "retained_events": [
+    "T0:E0",
+    "T1:E0"
+  ],
+  "removed_events": [],
+  "removed_objects": []
+}

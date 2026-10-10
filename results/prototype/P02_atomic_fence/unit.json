@@ -1,0 +1,187 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/P02_atomic_fence/case.c"
+  },
+  "shared_objects": [
+    "x",
+    "y"
+  ],
+  "seed_objects": [
+    "x"
+  ],
+  "objects": [
+    {
+      "id": "x",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 4,
+        "column": 13
+      }
+    },
+    {
+      "id": "y",
+      "type": "atomic_int",
+      "initial": 0,
+      "origin": "global",
+      "source_location": {
+        "line": 5,
+        "column": 13
+      }
+    }
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "x",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 9,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        },
+        {
+          "id": "T0:E1",
+          "kind": "Fence",
+          "object": null,
+          "ordering": "seq_cst",
+          "source_location": {
+            "line": 10,
+            "column": 5
+          },
+          "function": "writer"
+        },
+        {
+          "id": "T0:E2",
+          "kind": "Load",
+          "object": "y",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 11,
+            "column": 14
+          },
+          "function": "writer",
+          "target": "r0"
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Store",
+          "object": "y",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 18,
+            "column": 5
+          },
+          "function": "reader",
+          "value": 1
+        },
+        {
+          "id": "T1:E1",
+          "kind": "Fence",
+          "object": null,
+          "ordering": "seq_cst",
+          "source_location": {
+            "line": 19,
+            "column": 5
+          },
+          "function": "reader"
+        },
+        {
+          "id": "T1:E2",
+          "kind": "Load",
+          "object": "x",
+          "ordering": "relaxed",
+          "source_location": {
+            "line": 20,
+            "column": 14
+          },
+          "function": "reader",
+          "target": "r0"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "kind": "po",
+      "from": "T0:E0",
+      "to": "T0:E1"
+    },
+    {
+      "kind": "po",
+      "from": "T0:E1",
+      "to": "T0:E2"
+    },
+    {
+      "kind": "po",
+      "from": "T1:E0",
+      "to": "T1:E1"
+    },
+    {
+      "kind": "po",
+      "from": "T1:E1",
+      "to": "T1:E2"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E0",
+      "to": "T1:E2"
+    },
+    {
+      "kind": "communication_candidate",
+      "from": "T1:E0",
+      "to": "T0:E2"
+    }
+  ],
+  "bindings": [],
+  "calls": [],
+  "assumptions": [],
+  "outcome": [
+    {
+      "thread": 0,
+      "event": "T0:E2",
+      "value": 0
+    },
+    {
+      "thread": 1,
+      "event": "T1:E2",
+      "value": 0
+    }
+  ],
+  "slice": {
+    "strategy": "conservative_shared_object_thread_closure",
+    "retained_events": [
+      "T0:E0",
+      "T0:E1",
+      "T0:E2",
+      "T1:E0",
+      "T1:E1",
+      "T1:E2"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "scope": "hardware_projection_of_bounded_source_events",
+  "limitations": [
+    "C data-race freedom and full compiler correctness are not proved.",
+    "Communication candidates are not established reads-from or synchronization edges.",
+    "pthread creation succeeds; workers run once; startup/join occur outside the projected threads."
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "version": "internal-artifacts-1",
+  "source_sha256": "d4fea7c717a0ed6390d6d1392004afbb689ee69ae71f19945e61eea4b87b67e5",
+  "sha256": {
+    "source.ll": "8170898b24e5d096f97a7c7d80546a95282e1234df7ae58ea40598ef9547f222",
+    "eventir.json": "7fb931b7a687980a1396eb295df9ba427e8059f3bcb5c70d4b5a72e593bdc729",
+    "unit.json": "40fdc95db2fbd6c49eb70a4f51d9de8f34fd2239ef92e6ba9791179e7559fc77",
+    "slice.json": "b888d1486a47b0f19c12405a2f8858c0f2053bf05a9f0d4c185676cc89001f8c"
+  }
+}

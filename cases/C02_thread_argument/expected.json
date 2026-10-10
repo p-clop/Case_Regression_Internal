@@ -1,0 +1,156 @@
+{
+  "schema_version": 2,
+  "id": "C02_thread_argument",
+  "validation": "structure",
+  "objects": [
+    {
+      "id": "main.local",
+      "type": "int",
+      "initial": 0,
+      "origin": "thread_argument"
+    }
+  ],
+  "shared_objects": [
+    "main.local"
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "main.local",
+          "ordering": "plain",
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "main.local",
+          "ordering": "plain",
+          "function": "reader"
+        }
+      ]
+    }
+  ],
+  "seed_objects": [
+    "main.local"
+  ],
+  "outcome": [],
+  "slice": {
+    "retained_events": [
+      "T0:E0",
+      "T1:E0"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "unit": {
+    "objects": [
+      "main.local"
+    ],
+    "threads": [
+      {
+        "id": "T0",
+        "entry": "writer",
+        "events": [
+          "T0:E0"
+        ]
+      },
+      {
+        "id": "T1",
+        "entry": "reader",
+        "events": [
+          "T1:E0"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "kind": "communication_candidate",
+        "from": "T0:E0",
+        "to": "T1:E0"
+      }
+    ],
+    "outcome": [],
+    "bindings": [
+      {
+        "kind": "thread_argument",
+        "thread": "T0",
+        "function": "writer",
+        "name": "arg",
+        "object": "main.local"
+      },
+      {
+        "kind": "pointer_alias",
+        "thread": "T0",
+        "function": "writer",
+        "name": "p",
+        "object": "main.local"
+      },
+      {
+        "kind": "thread_argument",
+        "thread": "T1",
+        "function": "reader",
+        "name": "arg",
+        "object": "main.local"
+      },
+      {
+        "kind": "pointer_alias",
+        "thread": "T1",
+        "function": "reader",
+        "name": "p",
+        "object": "main.local"
+      }
+    ],
+    "calls": []
+  },
+  "bindings": [
+    {
+      "kind": "thread_argument",
+      "thread": "T0",
+      "function": "writer",
+      "name": "arg",
+      "object": "main.local"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T0",
+      "function": "writer",
+      "name": "p",
+      "object": "main.local"
+    },
+    {
+      "kind": "thread_argument",
+      "thread": "T1",
+      "function": "reader",
+      "name": "arg",
+      "object": "main.local"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T1",
+      "function": "reader",
+      "name": "p",
+      "object": "main.local"
+    }
+  ],
+  "calls": [],
+  "excluded_objects": [],
+  "expected_observations": {
+    "x86": "UNKNOWN",
+    "riscv": "UNKNOWN"
+  },
+  "scope": "static_structure_only",
+  "notes": "Independent manual structural oracle; plain shared accesses may race in C. main.local is initialized to zero before creation and remains alive through both joins.",
+  "assumptions": []
+}

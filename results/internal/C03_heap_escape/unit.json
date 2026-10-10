@@ -1,0 +1,136 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/C03_heap_escape/case.c"
+  },
+  "shared_objects": [
+    "heap_value"
+  ],
+  "seed_objects": [
+    "heap_value"
+  ],
+  "objects": [
+    {
+      "id": "heap_value",
+      "type": "int",
+      "initial": 0,
+      "origin": "heap_escape",
+      "allocation_site": {
+        "id": "main:malloc:0",
+        "function": "main",
+        "source_location": {
+          "line": 18,
+          "column": 23
+        }
+      },
+      "source_location": {
+        "line": 18,
+        "column": 10
+      }
+    }
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "heap_value",
+          "ordering": "plain",
+          "source_location": {
+            "line": 6,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "heap_value",
+          "ordering": "plain",
+          "source_location": {
+            "line": 12,
+            "column": 16
+          },
+          "function": "reader",
+          "target": "r0"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E0",
+      "to": "T1:E0"
+    }
+  ],
+  "bindings": [
+    {
+      "kind": "thread_argument",
+      "thread": "T0",
+      "function": "writer",
+      "name": "arg",
+      "object": "heap_value"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T0",
+      "function": "writer",
+      "name": "p",
+      "object": "heap_value"
+    },
+    {
+      "kind": "thread_argument",
+      "thread": "T1",
+      "function": "reader",
+      "name": "arg",
+      "object": "heap_value"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T1",
+      "function": "reader",
+      "name": "p",
+      "object": "heap_value"
+    }
+  ],
+  "calls": [],
+  "assumptions": [
+    {
+      "kind": "allocation_succeeded",
+      "allocation_site": "main:malloc:0",
+      "source_location": {
+        "line": 19,
+        "column": 5
+      }
+    }
+  ],
+  "outcome": [],
+  "slice": {
+    "strategy": "conservative_shared_object_thread_closure",
+    "retained_events": [
+      "T0:E0",
+      "T1:E0"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "scope": "hardware_projection_of_bounded_source_events",
+  "limitations": [
+    "C data-race freedom and full compiler correctness are not proved.",
+    "Communication candidates are not established reads-from or synchronization edges.",
+    "pthread creation succeeds; workers run once; startup/join occur outside the projected threads."
+  ]
+}

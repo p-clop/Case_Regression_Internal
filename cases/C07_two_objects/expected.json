@@ -1,0 +1,164 @@
+{
+  "schema_version": 2,
+  "id": "C07_two_objects",
+  "validation": "structure",
+  "objects": [
+    {
+      "id": "data",
+      "type": "int",
+      "initial": 0,
+      "origin": "global"
+    },
+    {
+      "id": "flag",
+      "type": "int",
+      "initial": 0,
+      "origin": "global"
+    }
+  ],
+  "shared_objects": [
+    "data",
+    "flag"
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "data",
+          "ordering": "plain",
+          "function": "writer",
+          "value": 1
+        },
+        {
+          "id": "T0:E1",
+          "kind": "Store",
+          "object": "flag",
+          "ordering": "plain",
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "flag",
+          "ordering": "plain",
+          "function": "reader"
+        },
+        {
+          "id": "T1:E1",
+          "kind": "Load",
+          "object": "data",
+          "ordering": "plain",
+          "function": "reader"
+        }
+      ]
+    }
+  ],
+  "seed_objects": [
+    "flag"
+  ],
+  "outcome": [
+    {
+      "thread": 1,
+      "object": "flag",
+      "occurrence": 0,
+      "value": 1
+    },
+    {
+      "thread": 1,
+      "object": "data",
+      "occurrence": 0,
+      "value": 0
+    }
+  ],
+  "slice": {
+    "retained_events": [
+      "T0:E0",
+      "T0:E1",
+      "T1:E0",
+      "T1:E1"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "unit": {
+    "objects": [
+      "data",
+      "flag"
+    ],
+    "threads": [
+      {
+        "id": "T0",
+        "entry": "writer",
+        "events": [
+          "T0:E0",
+          "T0:E1"
+        ]
+      },
+      {
+        "id": "T1",
+        "entry": "reader",
+        "events": [
+          "T1:E0",
+          "T1:E1"
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "kind": "po",
+        "from": "T0:E0",
+        "to": "T0:E1"
+      },
+      {
+        "kind": "po",
+        "from": "T1:E0",
+        "to": "T1:E1"
+      },
+      {
+        "kind": "communication_candidate",
+        "from": "T0:E0",
+        "to": "T1:E1"
+      },
+      {
+        "kind": "communication_candidate",
+        "from": "T0:E1",
+        "to": "T1:E0"
+      }
+    ],
+    "outcome": [
+      {
+        "thread": 1,
+        "event": "T1:E0",
+        "value": 1
+      },
+      {
+        "thread": 1,
+        "event": "T1:E1",
+        "value": 0
+      }
+    ],
+    "bindings": [],
+    "calls": []
+  },
+  "bindings": [],
+  "calls": [],
+  "excluded_objects": [],
+  "expected_observations": {
+    "x86": "UNKNOWN",
+    "riscv": "UNKNOWN"
+  },
+  "scope": "static_structure_only",
+  "notes": "Independent manual structural oracle; plain shared accesses may race in C. The flag=1,data=0 target only checks outcome-to-load binding; its feasibility remains UNKNOWN.",
+  "assumptions": []
+}

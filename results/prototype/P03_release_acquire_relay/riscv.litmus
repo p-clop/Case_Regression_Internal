@@ -1,0 +1,25 @@
+RISCV P03_release_acquire_relay_riscv
+
+{
+  data=0;
+  flag=0;
+  relay_flag=0;
+  0:x1=data;
+  0:x2=flag;
+  0:x3=relay_flag;
+  1:x1=data;
+  1:x2=flag;
+  1:x3=relay_flag;
+  2:x1=data;
+  2:x2=flag;
+  2:x3=relay_flag;
+}
+
+P0 | P1 | P2 ;
+li x31,1 | lw x11,0(x2) | lw x11,0(x3) ;
+sw x31,0(x1) | fence r,rw | fence r,rw ;
+li x31,1 | fence rw,w | lw x12,0(x1) ;
+fence rw,w | sw x11,0(x3) |  ;
+sw x31,0(x2) |  |  ;
+
+exists (1:x11=1 /\ 2:x11=1 /\ 2:x12=0)

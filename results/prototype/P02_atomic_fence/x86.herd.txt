@@ -1,0 +1,13 @@
+Test P02_atomic_fence_x86 Allowed
+States 3
+0:EAX=0; 1:EAX=1;
+0:EAX=1; 1:EAX=0;
+0:EAX=1; 1:EAX=1;
+No
+Witnesses
+Positive: 0 Negative: 3
+Condition exists (0:EAX=0 /\ 1:EAX=0)
+Observation P02_atomic_fence_x86 Never 0 3
+Time P02_atomic_fence_x86 0.00
+Hash=d8f89591b2adad11d42d3eeb22d212c6
+

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "id": "P03_release_acquire_relay",
+  "label": "Three-thread release/acquire relay through helper functions",
+  "seed_objects": ["data"],
+  "shared_objects": ["data", "flag", "relay_flag"],
+  "objects": [
+    {"id": "data", "type": "atomic_int", "initial": 0},
+    {"id": "flag", "type": "atomic_int", "initial": 0},
+    {"id": "relay_flag", "type": "atomic_int", "initial": 0}
+  ],
+  "slice_objects": ["data", "flag", "relay_flag"],
+  "removed_objects": [],
+  "threads": [
+    {
+      "entry": "writer",
+      "events": [
+        {"kind": "Store", "object": "data", "ordering": "relaxed", "value": 1},
+        {"kind": "Store", "object": "flag", "ordering": "release", "value": 1}
+      ]
+    },
+    {
+      "entry": "relay",
+      "events": [
+        {"kind": "Load", "object": "flag", "ordering": "acquire"},
+        {"kind": "Store", "object": "relay_flag", "ordering": "release", "value": {"event": "T1:E0"}}
+      ]
+    },
+    {
+      "entry": "reader",
+      "events": [
+        {"kind": "Load", "object": "relay_flag", "ordering": "acquire"},
+        {"kind": "Load", "object": "data", "ordering": "relaxed"}
+      ]
+    }
+  ],
+  "outcome": [
+    {"thread": 1, "object": "flag", "occurrence": 0, "value": 1},
+    {"thread": 2, "object": "relay_flag", "occurrence": 0, "value": 1},
+    {"thread": 2, "object": "data", "occurrence": 0, "value": 0}
+  ],
+  "expected_observations": {"x86": "Never", "riscv": "Never"},
+  "scope": "hardware_projection",
+  "notes": "Manually authored oracle. Inline helper contexts into their calling threads and preserve the relay load-to-store value dependency. Acquire/release lower to ordered x86 TSO accesses and RISC-V acquire/release fences. The targeted successful relay must not observe stale data. This bounded example uses neither loops nor locks nor condition variables and is not general synchronization support."
+}

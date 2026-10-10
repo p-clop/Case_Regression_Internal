@@ -1,0 +1,119 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/C02_thread_argument/case.c"
+  },
+  "shared_objects": [
+    "main.local"
+  ],
+  "seed_objects": [
+    "main.local"
+  ],
+  "objects": [
+    {
+      "id": "main.local",
+      "type": "int",
+      "initial": 0,
+      "origin": "thread_argument",
+      "source_location": {
+        "line": 17,
+        "column": 9
+      }
+    }
+  ],
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "main.local",
+          "ordering": "plain",
+          "source_location": {
+            "line": 5,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "main.local",
+          "ordering": "plain",
+          "source_location": {
+            "line": 11,
+            "column": 16
+          },
+          "function": "reader",
+          "target": "r0"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "kind": "communication_candidate",
+      "from": "T0:E0",
+      "to": "T1:E0"
+    }
+  ],
+  "bindings": [
+    {
+      "kind": "thread_argument",
+      "thread": "T0",
+      "function": "writer",
+      "name": "arg",
+      "object": "main.local"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T0",
+      "function": "writer",
+      "name": "p",
+      "object": "main.local"
+    },
+    {
+      "kind": "thread_argument",
+      "thread": "T1",
+      "function": "reader",
+      "name": "arg",
+      "object": "main.local"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T1",
+      "function": "reader",
+      "name": "p",
+      "object": "main.local"
+    }
+  ],
+  "calls": [],
+  "assumptions": [],
+  "outcome": [],
+  "slice": {
+    "strategy": "conservative_shared_object_thread_closure",
+    "retained_events": [
+      "T0:E0",
+      "T1:E0"
+    ],
+    "removed_events": [],
+    "removed_objects": []
+  },
+  "scope": "hardware_projection_of_bounded_source_events",
+  "limitations": [
+    "C data-race freedom and full compiler correctness are not proved.",
+    "Communication candidates are not established reads-from or synchronization edges.",
+    "pthread creation succeeds; workers run once; startup/join occur outside the projected threads."
+  ]
+}

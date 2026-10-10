@@ -1,0 +1,94 @@
+{
+  "version": "prototype-1",
+  "source": {
+    "path": "/home/zhovy/work/Case_Regression_Internal/cases/C02_thread_argument/case.c"
+  },
+  "threads": [
+    {
+      "id": "T0",
+      "index": 0,
+      "entry": "writer",
+      "events": [
+        {
+          "id": "T0:E0",
+          "kind": "Store",
+          "object": "main.local",
+          "ordering": "plain",
+          "source_location": {
+            "line": 5,
+            "column": 5
+          },
+          "function": "writer",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "index": 1,
+      "entry": "reader",
+      "events": [
+        {
+          "id": "T1:E0",
+          "kind": "Load",
+          "object": "main.local",
+          "ordering": "plain",
+          "source_location": {
+            "line": 11,
+            "column": 16
+          },
+          "function": "reader",
+          "target": "r0"
+        }
+      ]
+    }
+  ],
+  "objects": [
+    {
+      "id": "main.local",
+      "type": "int",
+      "initial": 0,
+      "origin": "thread_argument",
+      "source_location": {
+        "line": 17,
+        "column": 9
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "kind": "thread_argument",
+      "thread": "T0",
+      "function": "writer",
+      "name": "arg",
+      "object": "main.local"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T0",
+      "function": "writer",
+      "name": "p",
+      "object": "main.local"
+    },
+    {
+      "kind": "thread_argument",
+      "thread": "T1",
+      "function": "reader",
+      "name": "arg",
+      "object": "main.local"
+    },
+    {
+      "kind": "pointer_alias",
+      "thread": "T1",
+      "function": "reader",
+      "name": "p",
+      "object": "main.local"
+    }
+  ],
+  "calls": [],
+  "assumptions": [],
+  "diagnostics": [
+    "Static bounded extraction assumes every pthread_create succeeds and all created workers can overlap.",
+    "Plain shared int accesses describe hardware events; this does not establish defined C behavior or absence of data races."
+  ]
+}

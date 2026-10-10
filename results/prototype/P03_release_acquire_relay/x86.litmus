@@ -1,0 +1,13 @@
+X86 P03_release_acquire_relay_x86
+
+{
+  data=0;
+  flag=0;
+  relay_flag=0;
+}
+
+P0 | P1 | P2 ;
+MOV [data],$1 | MOV EAX,[flag] | MOV EAX,[relay_flag] ;
+MOV [flag],$1 | MOV [relay_flag],EAX | MOV EBX,[data] ;
+
+exists (1:EAX=1 /\ 2:EAX=1 /\ 2:EBX=0)

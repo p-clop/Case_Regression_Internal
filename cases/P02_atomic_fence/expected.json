@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "id": "P02_atomic_fence",
+  "label": "Relaxed atomic store buffering with sequentially consistent fences",
+  "seed_objects": ["x"],
+  "shared_objects": ["x", "y"],
+  "objects": [
+    {"id": "x", "type": "atomic_int", "initial": 0},
+    {"id": "y", "type": "atomic_int", "initial": 0}
+  ],
+  "slice_objects": ["x", "y"],
+  "removed_objects": [],
+  "threads": [
+    {
+      "entry": "writer",
+      "events": [
+        {"kind": "Store", "object": "x", "ordering": "relaxed", "value": 1},
+        {"kind": "Fence", "ordering": "seq_cst"},
+        {"kind": "Load", "object": "y", "ordering": "relaxed"}
+      ]
+    },
+    {
+      "entry": "reader",
+      "events": [
+        {"kind": "Store", "object": "y", "ordering": "relaxed", "value": 1},
+        {"kind": "Fence", "ordering": "seq_cst"},
+        {"kind": "Load", "object": "x", "ordering": "relaxed"}
+      ]
+    }
+  ],
+  "outcome": [
+    {"thread": 0, "object": "y", "occurrence": 0, "value": 0},
+    {"thread": 1, "object": "x", "occurrence": 0, "value": 0}
+  ],
+  "expected_observations": {"x86": "Never", "riscv": "Never"},
+  "scope": "hardware_projection",
+  "notes": "Manually authored oracle for the explicit lowering: relaxed accesses become ordinary architecture loads/stores; seq_cst fence becomes x86 MFENCE or RISC-V FENCE RW,RW. Both fences must survive slicing. This tests the chosen architecture projection, not an arbitrary C compiler or a full C11 axiomatic model."
+}

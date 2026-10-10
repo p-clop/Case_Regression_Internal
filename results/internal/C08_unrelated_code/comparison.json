@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "checks": {
+    "shared_objects": {
+      "status": "PASS",
+      "errors": []
+    },
+    "events": {
+      "status": "PASS",
+      "errors": []
+    },
+    "slice": {
+      "status": "PASS",
+      "errors": []
+    },
+    "verification_unit": {
+      "status": "PASS",
+      "errors": []
+    },
+    "bindings": {
+      "status": "PASS",
+      "errors": []
+    },
+    "equivalence": {
+      "status": "PASS",
+      "reference": "C07_two_objects",
+      "errors": []
+    }
+  },
+  "errors": []
+}
