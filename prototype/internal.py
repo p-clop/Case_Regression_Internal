@@ -23,7 +23,7 @@ def run_internal(case: Path, output: Path, *, clang: str | None,
     output.mkdir(parents=True, exist_ok=True)
     result = {'case': case.name, 'status': 'UNKNOWN', 'scope': 'structure_only',
               'checks': {name: _unknown('not_run') for name in CHECKS},
-              'verification': {arch: _unknown('no_reviewed_model_oracle') for arch in ('x86', 'riscv')},
+              'verification': {arch: _unknown('architecture_checked_by_separate_runner') for arch in ('x86', 'riscv')},
               'output': str(output), 'artifacts': {}}
     try:
         source = case / 'case.c'
@@ -134,7 +134,7 @@ def write_summary(output: Path, results: list[dict], metadata: dict) -> str:
                              'riscv_model': 'UNKNOWN', 'reason': result.get('reason', '')})
     lines = ['# C01–C08 自动结构回归', '',
              f'本次结构结果：**{status}**；PASS {counts["PASS"]} / FAIL {counts["FAIL"]} / UNKNOWN {counts["UNKNOWN"]}。', '',
-             '模型验证均为 **UNKNOWN**：这八个 Case 尚无经过审查的架构模型 Oracle。结构 PASS 不代表模型验证通过。', '',
+             '本入口只执行结构检查，模型项保持 **UNKNOWN**。独立架构判据见各例 `architecture.json`，执行 `scripts/run_c_architecture.sh`；模型比较与正式审查分列。', '',
              '| Case | 共享对象 | 事件 | 切片 | Verification Unit | 绑定/调用 | 保留/删除事件 | 结构结果 |',
              '| --- | --- | --- | --- | --- | --- | --- | --- |']
     for result in results:
@@ -143,7 +143,7 @@ def write_summary(output: Path, results: list[dict], metadata: dict) -> str:
         lines.append(f'| [{result["case"]}]({result["case"]}/result.json) | '
                      + ' | '.join(c[name]['status'] for name in CHECKS)
                      + f' | {numbers.get("retained_events", "?")}/{numbers.get("removed_events", "?")} | {result["status"]} |')
-    lines.extend(['', '额外的单元等价检查：'])
+    lines.extend(['', '额外的单元等价检查：', ''])
     for result in results:
         if result.get('equivalent_unit_to'):
             lines.append(f'- {result["case"]} 与 {result["equivalent_unit_to"]}：'

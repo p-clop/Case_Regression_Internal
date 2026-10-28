@@ -1,0 +1,7 @@
+{
+  "schema": "benchmark-obligations-1",
+  "cases": {
+    "B01_spsc_ring": ["B01-PUB", "B01-RECYCLE", "B01-FIFO", "B01-BOUNDARY"],
+    "B02_spinlock": ["B02-MUTEX", "B02-HANDOFF", "B02-RECORD", "B02-BOUNDARY"]
+  }
+}

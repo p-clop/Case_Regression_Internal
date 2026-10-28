@@ -1,0 +1,10 @@
+{
+  "ref": "refs/tags/v24.11",
+  "node_id": "MDM6UmVmOTYzNDg4NDI6cmVmcy90YWdzL3YyNC4xMQ==",
+  "url": "https://api.github.com/repos/DPDK/dpdk/git/refs/tags/v24.11",
+  "object": {
+    "sha": "8f7a46c40b38c1dd39badc3d035e38dd8a6f3ea0",
+    "type": "tag",
+    "url": "https://api.github.com/repos/DPDK/dpdk/git/tags/8f7a46c40b38c1dd39badc3d035e38dd8a6f3ea0"
+  }
+}

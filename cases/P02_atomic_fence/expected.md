@@ -10,3 +10,9 @@
 - 删除两个 fence 后得到 SB；该变体的目标结果应恢复为两架构均 `Sometimes`，可用作负向敏感性检查。
 
 本例验证上述架构投影及原子内存序的保留，不替代完整 C11 模型检查或任意编译器的映射证明。实际是否通过以报告及 herd7 输出为准。
+
+## 正确性要求与判断边界
+
+要求：保留两个 seq_cst fence；目标预期 Never；删除 fence 的 SB 对照恢复 Sometimes。结构结果依据独立 `expected.json` 逐字段比较；禁止漏事件、改变对象身份或内存序，以及把潜在通信边当作确定的 reads-from/happens-before。
+
+模型允许与禁止行为只针对上述目标条件及明确映射；实际 Sometimes/Never 与比较 PASS/FAIL 分列。正式架构审查未记录时保持 UNKNOWN，详见[三层验证说明](../../CORRECTNESS.md)。

@@ -1,0 +1,24 @@
+{
+  "node_id": "TA_kwDOBb4qqtoAKDhmN2E0NmM0MGIzOGMxZGQzOWJhZGMzZDAzNWUzOGRkOGE2ZjNlYTA",
+  "sha": "8f7a46c40b38c1dd39badc3d035e38dd8a6f3ea0",
+  "url": "https://api.github.com/repos/DPDK/dpdk/git/tags/8f7a46c40b38c1dd39badc3d035e38dd8a6f3ea0",
+  "tagger": {
+    "name": "Thomas Monjalon",
+    "email": "thomas@monjalon.net",
+    "date": "2024-11-30T22:31:38Z"
+  },
+  "object": {
+    "sha": "1b3bf1128d9bda5595861814792f74b8f57160c8",
+    "type": "commit",
+    "url": "https://api.github.com/repos/DPDK/dpdk/git/commits/1b3bf1128d9bda5595861814792f74b8f57160c8"
+  },
+  "tag": "v24.11",
+  "message": "dpdk-24.11\n",
+  "verification": {
+    "verified": false,
+    "reason": "unsigned",
+    "signature": null,
+    "payload": null,
+    "verified_at": null
+  }
+}

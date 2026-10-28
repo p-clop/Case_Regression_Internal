@@ -49,7 +49,7 @@
   "provenance": {
     "source_sha256": "8168ce79c31c1bc9b1340ab1e86e05022374e97ab165276f6d8d29de25a35a69",
     "oracle_sha256": "8daedb57adc79617739330234e4ecc4a56d71741235e591359971f970d0f390d",
-    "clang": "/home/zhovy/work/Case_Regression_Internal/../.tools/clang18/bin/clang",
+    "clang": "/home/zhovy/work/.tools/clang18/bin/clang",
     "mode": "extract"
   },
   "errors": [],

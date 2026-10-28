@@ -1,0 +1,6 @@
+{
+  "schema": "c-architecture-reviews-1",
+  "case": "C03_heap_escape",
+  "records": [],
+  "note": "尚无正式团队评审记录；独立推导及模型比较不自动确认正式审查。"
+}

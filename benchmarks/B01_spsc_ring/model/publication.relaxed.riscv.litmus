@@ -1,0 +1,18 @@
+RISCV B01_spsc_ring_publication_relaxed_riscv
+
+{
+  data=0;
+  tail=0;
+  0:x1=data;
+  1:x1=data;
+  0:x2=tail;
+  1:x2=tail;
+}
+
+P0 | P1 ;
+li x12,1 | lw x10,0(x2) ;
+sw x12,0(x1) | lw x11,0(x1) ;
+li x12,1 |  ;
+sw x12,0(x2) |  ;
+
+exists (1:x10=1 /\ 1:x11=0)

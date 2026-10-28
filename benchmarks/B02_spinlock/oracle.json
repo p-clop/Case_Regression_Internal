@@ -1,0 +1,338 @@
+{
+  "schema": "engineering-benchmark-2",
+  "case": "B02_spinlock",
+  "basis": "independent source review, atomic modification order and release/acquire reasoning; see oracle.md",
+  "behavior_oracle": "DRAFT_WITH_EVIDENCE",
+  "architecture_oracle_review": "UNKNOWN",
+  "full_program_model_verification": "UNKNOWN",
+  "full_program_reason": "Manual bounded SC protocol includes CAS success/failure, wait/reset/unlock; no C11/RVWMO full-program proof. Handoff ISA projection still omits CAS write/failure/retry and full C-to-ISA mapping.",
+  "native": {
+    "baseline": {
+      "returncode": 0,
+      "status": "PASS"
+    },
+    "checker_corruption": {
+      "returncode": 1,
+      "status": "FAIL",
+      "scope": "checker self-test; corruption remains inside lock"
+    },
+    "invalid_configuration": {
+      "returncode": 2
+    },
+    "conditions": [
+      "exactly two workers",
+      "all shared record accesses are bracketed by matching lock/unlock calls on one object; mutual exclusion is a property, not an assumed result",
+      "quiescent initialization and destruction",
+      "all pthread_create calls succeed"
+    ],
+    "invariants": [
+      "only CAS 0-to-1 winner enters critical section",
+      "count/checksum remain consistent inside critical section",
+      "each worker completes N updates",
+      "final count=2*N and lock=0"
+    ]
+  },
+  "projections": {
+    "handoff.relaxed": {
+      "x86": "Never",
+      "riscv": "Sometimes"
+    },
+    "handoff.ordered": {
+      "x86": "Never",
+      "riscv": "Never"
+    }
+  },
+  "review_file": "reviews.json",
+  "language_scope": "C11 原子接口及项目明确选择的 DPDK C11 分支；原生编译环境与手工架构映射分别记录",
+  "references": {
+    "C11": {
+      "title": "C11 委员会草案 N1570",
+      "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+      "version": "N1570, 2011-04-12",
+      "sections": "§5.1.2.4 p11 release/acquire、p18 happens-before；§6.2.5 p9 unsigned 模运算；§7.17.3 内存序；§7.17.7.4 p2 CAS 比较、写回 expected、成败内存序"
+    },
+    "RVWMO": {
+      "title": "RISC-V RVWMO Explanatory Material",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/mm-eplan.html",
+      "version": "ISA v20260120；说明版本 0.1",
+      "sections": "§37.1.3.6 Fences；Table 16 C/C++ mappings；本文手工投影仅采用普通内存 Load/Store 映射"
+    },
+    "X86_MODEL": {
+      "title": "herdtools7 x86tso.cat",
+      "url": "https://github.com/herd/herdtools7/blob/7.58/herd/libdir/x86tso.cat",
+      "version": "herdtools7 7.58；本次实际模型及 include 闭包哈希以 result.json 为准",
+      "sections": "x86tso.cat 的保序与一致性约束；本项目 model/*.x86.litmus 的目标条件"
+    },
+    "DPDK": {
+      "title": "DPDK 固定版本源码",
+      "url": "https://github.com/DPDK/dpdk/blob/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/eal/include/generic/rte_spinlock.h",
+      "version": "v24.11 / 1b3bf1128d9bda5595861814792f74b8f57160c8",
+      "sections": "source_anchors 对应函数；vendor/manifest.json 固定原始文件哈希；provenance.md 记录改动"
+    },
+    "RVWMO_SPEC": {
+      "title": "RVWMO Memory Consistency Model",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/rvwmo.html",
+      "version": "ISA v20260120；RVWMO 2.0",
+      "sections": "§17.1.1 global memory order、preserved program order 与相关内存模型公理；不涵盖 I/O"
+    }
+  },
+  "obligations": [
+    {
+      "id": "B02-MUTEX",
+      "requirement": "只有成功获取锁的线程可以进入临界区",
+      "preconditions": [
+        "locked 初值 0；strong CAS expected 每轮重置为 0",
+        "持锁期间仅持有者 release 解锁；无越权写锁状态"
+      ],
+      "allowed": [
+        "CAS 失败、等待和重试",
+        "一个线程连续多次成功；等待次数不固定"
+      ],
+      "forbidden": [
+        "两个线程同时持锁",
+        "失败 CAS 或仅观察到 locked=0 的线程进入临界区"
+      ],
+      "risk": "把 CAS 降为普通 Load/Store 或丢失失败路径，会破坏互斥",
+      "reasoning": "每次 lock 调用初始化 expected=0；strong CAS 原子比较并在成功时写1。失败把实际值写回 expected，relaxed 等待0后必须重置 expected=0 再竞争。成功0->1者在 release 写0前拥有锁。只有观察到0不是获得锁；遗漏重置可能使1->1 CAS成功，拆开比较和写入也可让两线程进入。新增有限 SC 状态机分别保留这些分支，检查 critical/unlock 状态的持有者至多一个，并用错误变体产生反例。",
+      "references": [
+        "C11",
+        "DPDK"
+      ],
+      "source_anchors": [
+        {
+          "path": "vendor/dpdk/rte_spinlock.h",
+          "symbol": "rte_spinlock_lock"
+        },
+        {
+          "path": "vendor/dpdk/rte_spinlock.h",
+          "symbol": "rte_atomic_compare_exchange_strong_explicit"
+        },
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "worker"
+        },
+        {
+          "path": "scripts/spinlock_protocol.py",
+          "symbol": "successors"
+        },
+        {
+          "path": "scripts/spinlock_protocol.py",
+          "symbol": "explore"
+        }
+      ],
+      "native_kinds": [],
+      "native_scope": "没有能够独立判定本义务的原生检查；依据为源码推导或局部投影",
+      "projection_checks": [],
+      "remaining_gaps": [
+        "有界协议为手工映射的两线程 SC 状态机，未证明与完整 C11/RVWMO 程序等价",
+        "handoff ISA 投影仍省略 CAS 写回和失败重试；原生记录不独立证明互斥",
+        "未承诺公平性、无饥饿、等待上界或无限轮正确性"
+      ],
+      "next_action": "评审源码到协议状态机的映射与错误反例，再扩展 C11/RVWMO CAS 映射；协议比较状态与完整验证分别报告"
+    },
+    {
+      "id": "B02-HANDOFF",
+      "requirement": "后继成功获取锁后应看到前一临界区写入",
+      "preconditions": [
+        "前一线程已持锁并写入记录",
+        "后继 acquire CAS 读取对应 release 解锁值；初始化不与工作访问并发"
+      ],
+      "allowed": [
+        "竞争失败只执行 relaxed 等待并重试",
+        "初次获取读取初始化锁状态"
+      ],
+      "forbidden": [
+        "后继接收相应解锁后仍读取旧记录"
+      ],
+      "risk": "仅保持原子竞争而弱化 acquire/release，会失去普通记录的跨临界区同步依据",
+      "reasoning": "H1 前一持有者写记录，H2 release 解锁写0，H3 后继以 acquire CAS 从对应解锁的0成功写1，H4 后继读取记录；H1 sb H2 sw H3 sb H4 因而 H1 hb H4。初次读取初始化0与相同线程再次获取须按各自顺序分析，不能只凭数值0认定来自指定解锁。handoff 投影以 Load 只表示 H3 的读取部分；协议模型只检查互斥，不补足弱内存可见性。",
+      "references": [
+        "C11",
+        "DPDK",
+        "RVWMO",
+        "X86_MODEL",
+        "RVWMO_SPEC"
+      ],
+      "source_anchors": [
+        {
+          "path": "vendor/dpdk/rte_spinlock.h",
+          "symbol": "rte_spinlock_unlock"
+        },
+        {
+          "path": "vendor/dpdk/rte_spinlock.h",
+          "symbol": "rte_spinlock_lock"
+        },
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "update_record"
+        }
+      ],
+      "native_kinds": [],
+      "native_scope": "没有能够独立判定本义务的原生检查；依据为源码推导或局部投影",
+      "projection_checks": [
+        "handoff.relaxed",
+        "handoff.ordered"
+      ],
+      "remaining_gaps": [
+        "投影不证明 CAS 互斥",
+        "完整 C-to-ISA 与多次锁交接尚未验证"
+      ],
+      "next_action": "按 oracle.md 的 H1-H4 及唯一解锁来源审查局部投影；继续补齐成功 CAS 的 ISA 事件与多次交接关系"
+    },
+    {
+      "id": "B02-RECORD",
+      "requirement": "受保护记录每次增加一次并保持校验一致",
+      "preconditions": [
+        "两个 worker 各更新 N 次，1<=N<=10000000",
+        "运行期间全部 count/checksum 访问持有同一把锁；uint64 校验乘法按模运算"
+      ],
+      "allowed": [
+        "worker 的更新先后和等待次数不同"
+      ],
+      "forbidden": [
+        "更新前 checksum 与 count 不一致",
+        "最终 count!=2N、completed!=[N,N]、errors!=[0,0]、校验错误或锁非空闲"
+      ],
+      "risk": "丢失更新、无锁读写或载荷损坏可能破坏记录关系",
+      "reasoning": "可选记录由每个 worker 独占缓冲，持锁记录 update_record 前后的实际 count/checksum，join 后导出。Python 不调用 C checksum()，独立计算每次前后校验，检查 after=before+1、每线程局部序号与进度、两线程提交后计数的并集恰为1..2N且无重复。runner 另检查最终值与锁状态。临时副本中的中间校验公式错误可被独立记录检查发现，即使 C 自检及最终 checksum 均匹配。",
+      "references": [
+        "C11",
+        "DPDK"
+      ],
+      "source_anchors": [
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "update_record"
+        },
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "checksum"
+        },
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "bool ok"
+        },
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "write_trace"
+        },
+        {
+          "path": "scripts/record_oracle.py",
+          "symbol": "check_trace"
+        }
+      ],
+      "native_kinds": [
+        "baseline"
+      ],
+      "native_scope": "程序内断言、Python 独立逐次更新轨迹及最终计数/校验/锁状态；覆盖记录的有界运行，不直接判定互斥或全部交接",
+      "projection_checks": [],
+      "remaining_gaps": [
+        "检查未独立穷尽证明临界区无重叠",
+        "有界运行通过不保证所有调度完成"
+      ],
+      "next_action": "复核固定校验向量、重复/跳步/中间载荷错误拒绝与完整更新链，再与协议及架构证据分别评审"
+    },
+    {
+      "id": "B02-BOUNDARY",
+      "requirement": "初始化销毁与顺序 trylock 行为符合前提",
+      "preconditions": [
+        "locked 初始化为 0；record 初始化为 (0,checksum(0))",
+        "所有创建成功，main 在全部 join 后读取最终记录"
+      ],
+      "allowed": [
+        "空闲 trylock 成功；持锁 trylock 失败",
+        "非法 iterations 返回 2"
+      ],
+      "forbidden": [
+        "未初始化即启动 worker",
+        "持锁时第二次 trylock 成功或错误地解锁他人锁"
+      ],
+      "risk": "错误生命周期或边界行为会破坏锁协议的分析前提",
+      "reasoning": "初始化及顺序 trylock 检查均在线程启动前，首次成功、持锁时失败；释放后初始化 record=(0,checksum(0))，全部 join 后读取最终状态并导出轨迹。创建、join、分配和轨迹写入失败属于环境/证据错误。并发互斥由独立有界协议检查，顺序边界不替代并发证明。",
+      "references": [
+        "C11",
+        "DPDK"
+      ],
+      "source_anchors": [
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "rte_spinlock_trylock"
+        },
+        {
+          "path": "B02_spinlock/benchmark.c",
+          "symbol": "pthread_join"
+        },
+        {
+          "path": "vendor/dpdk/rte_spinlock.h",
+          "symbol": "rte_spinlock_init"
+        }
+      ],
+      "native_kinds": [
+        "baseline",
+        "invalid_configuration"
+      ],
+      "native_scope": "有界工作负载及程序内断言；不覆盖全部线程交错",
+      "projection_checks": [],
+      "remaining_gaps": [
+        "顺序 trylock 检查不证明并发互斥",
+        "线程环境失败不是协议反例"
+      ],
+      "next_action": "核对初始化、退出及锁持有者约束；并发互斥由独立模型覆盖"
+    }
+  ],
+  "variants": {
+    "baseline": {
+      "role": "上游真实锁与本地有界负载；默认回归导出每次更新前后记录并由 Python 独立检查",
+      "limitation": "本次参数与调度下的有界行为检查，不是完整程序证明"
+    },
+    "checker_corruption": {
+      "role": "BENCH_INJECT_CORRUPTION 人工破坏载荷或校验值，程序预期 FAIL/1，回归比较预期 PASS",
+      "limitation": "仅证明检查器能检测该损坏；不是内存序漏洞或上游历史缺陷"
+    },
+    "relaxed": {
+      "role": "人工删除硬件投影排序约束的问题对照",
+      "limitation": "仅投影事件；x86 保留 MOV 的架构顺序，relaxed 与 ordered 可得到相同结论"
+    },
+    "ordered": {
+      "role": "人工恢复指定发布与接收顺序的修复对照",
+      "limitation": "仅对应局部排序义务；不包含被省略的完整算法语义"
+    },
+    "source_problem_fix": {
+      "role": "源码级内存序问题版及修复版尚未提供",
+      "limitation": "弱化普通载荷同步可能导致 C11 数据竞争；不使用该原生运行作为可靠的架构行为依据"
+    }
+  },
+  "record_contract": {
+    "trace_schema": "b02-record-trace-1",
+    "workers": 2,
+    "fields": [
+      "worker",
+      "ordinal",
+      "before_count",
+      "before_checksum",
+      "after_count",
+      "after_checksum"
+    ],
+    "initial_count": 0,
+    "increment": 1,
+    "checksum_multiplier": 11400714819323198485,
+    "checksum_xor": 6510698343141591806,
+    "checksum_modulus": 18446744073709551616
+  },
+  "protocol_contract": {
+    "schema": "b02-spinlock-protocol-1",
+    "workers": 2,
+    "baseline_rounds": [
+      1,
+      2,
+      3
+    ],
+    "control_rounds": 2,
+    "semantics": "single-lock SC state machine; not a C11/RVWMO full-program model",
+    "expected": {
+      "atomic_cas": "PASS",
+      "split_cas": "FAIL",
+      "missing_expected_reset": "FAIL"
+    }
+  }
+}

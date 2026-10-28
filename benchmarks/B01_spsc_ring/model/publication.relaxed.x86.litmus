@@ -1,0 +1,12 @@
+X86 B01_spsc_ring_publication_relaxed_x86
+
+{
+  data=0;
+  tail=0;
+}
+
+P0 | P1 ;
+MOV [data],$1 | MOV EAX,[tail] ;
+MOV [tail],$1 | MOV EBX,[data] ;
+
+exists (1:EAX=1 /\ 1:EBX=0)

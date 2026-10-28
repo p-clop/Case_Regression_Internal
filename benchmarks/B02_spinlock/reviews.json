@@ -1,0 +1,6 @@
+{
+  "schema": "benchmark-reviews-1",
+  "case": "B02_spinlock",
+  "records": [],
+  "note": "尚无正式团队评审记录；空记录意味着 UNKNOWN。规范核查与实验符合预期不会自动创建评审。"
+}

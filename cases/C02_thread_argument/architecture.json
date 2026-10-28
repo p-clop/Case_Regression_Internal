@@ -1,0 +1,146 @@
+{
+  "schema": "c-architecture-oracle-1",
+  "case": "C02_thread_argument",
+  "family": "single_location",
+  "scope": "explicit_32bit_hardware_projection",
+  "source_sha256": "b282160b95b48f49439c8826923c2f43a9f8317734b675f0308f8659b4514c79",
+  "structure_oracle_sha256": "1f66e96b9909eb0201aa1a827a2509ea779251bcd237791e74a353057fce3b7d",
+  "c_program_correctness": "UNKNOWN",
+  "assumptions": [
+    "两个worker各执行一次；pthread创建成功；初始化在启动前完成，join位于投影之外",
+    "将保留的普通int访问显式映射为对齐、互不重叠的32位普通架构访存",
+    "按原访存程序顺序保留事件；不引入编译器优化、额外依赖、同步或确定的reads-from边",
+    "原始C普通跨线程冲突访问可能构成数据竞争，仅验证硬件投影，不执行原始C推断语言行为"
+  ],
+  "projections": {
+    "slice": {
+      "objects": [
+        {
+          "id": "main.local",
+          "symbol": "x",
+          "initial": 0
+        }
+      ],
+      "threads": [
+        {
+          "index": 0,
+          "entry": "writer",
+          "events": [
+            {
+              "id": "T0:E0",
+              "kind": "Store",
+              "object": "main.local",
+              "ordering": "plain",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "entry": "reader",
+          "events": [
+            {
+              "id": "T1:E0",
+              "kind": "Load",
+              "object": "main.local",
+              "ordering": "plain"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "variants": {
+    "plain": {
+      "projection": "slice",
+      "fences": []
+    }
+  },
+  "queries": [
+    {
+      "id": "read_initial",
+      "variant": "plain",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 0
+        }
+      ],
+      "expected": {
+        "x86": "Sometimes",
+        "riscv": "Sometimes"
+      },
+      "reasoning": "读在worker写之前可取得初始化0，另一执行又可读到1；线程创建调用的先后不等于两个worker访存的先后。"
+    },
+    {
+      "id": "read_written",
+      "variant": "plain",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 1
+        }
+      ],
+      "expected": {
+        "x86": "Sometimes",
+        "riscv": "Sometimes"
+      },
+      "reasoning": "worker写1后另一个worker读取可见1，也存在读到初始化0的执行；两架构都允许。"
+    },
+    {
+      "id": "unwritten_value",
+      "variant": "plain",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 2
+        }
+      ],
+      "expected": {
+        "x86": "Never",
+        "riscv": "Never"
+      },
+      "reasoning": "投影中只有初始化写0和一次写1；读值必须来自对应位置的写，2没有写来源。"
+    }
+  ],
+  "references": [
+    {
+      "id": "C11",
+      "url": "https://www.open-std.org/jtc1/sc22/WG14/www/docs/n1570.pdf",
+      "version": "N1570 2011-04-12",
+      "scope": "§5.1.2.4 p25 数据竞争；不把硬件投影当作原始C行为"
+    },
+    {
+      "id": "RVWMO_AXIOMS",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/rvwmo.html",
+      "version": "ISA v20260120, RVWMO 2.0",
+      "scope": "§17.1.1 preserved program order、Load Value Axiom与Coherence约束；解释材料与规范正文分开"
+    },
+    {
+      "id": "RVWMO",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/mm-eplan.html",
+      "version": "ISA v20260120, explanation 0.1",
+      "scope": "§37.1.3 的保序、读值和fence；Table 16 普通访问及屏障映射"
+    },
+    {
+      "id": "X86_TSO",
+      "url": "https://github.com/herd/herdtools7/blob/7.58/herd/libdir/x86tso.cat",
+      "version": "herdtools7 7.58",
+      "scope": "固定模型的读值与保序约束；实际CAT及include版本另存"
+    },
+    {
+      "id": "HERD",
+      "url": "https://diy.inria.fr/doc/herd.html",
+      "version": "herd7 manual",
+      "scope": "Observation针对明确的litmus目标与模型，不表示原生频率"
+    }
+  ],
+  "remaining_gaps": [
+    "尚无正式团队架构Oracle审查记录",
+    "未验证完整C语言数据竞争语义或任意编译器的C-to-ISA映射",
+    "有限直线硬件投影不代表完整前端集成或任意程序切片正确"
+  ]
+}

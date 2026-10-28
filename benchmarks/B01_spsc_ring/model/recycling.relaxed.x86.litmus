@@ -1,0 +1,12 @@
+X86 B01_spsc_ring_recycling_relaxed_x86
+
+{
+  data=1;
+  tail=0;
+}
+
+P0 | P1 ;
+MOV EAX,[data] | MOV EAX,[tail] ;
+MOV [tail],$1 | MOV [data],$2 ;
+
+exists (0:EAX=2 /\ 1:EAX=1)

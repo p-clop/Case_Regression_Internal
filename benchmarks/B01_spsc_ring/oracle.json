@@ -1,0 +1,325 @@
+{
+  "schema": "engineering-benchmark-2",
+  "case": "B01_spsc_ring",
+  "basis": "independent source review and release/acquire reasoning; see oracle.md",
+  "behavior_oracle": "DRAFT_WITH_EVIDENCE",
+  "architecture_oracle_review": "UNKNOWN",
+  "full_program_model_verification": "UNKNOWN",
+  "full_program_reason": "No complete control-flow/array/C-to-ISA verification; projections cover two ordering obligations only",
+  "native": {
+    "baseline": {
+      "returncode": 0,
+      "status": "PASS"
+    },
+    "checker_corruption": {
+      "returncode": 1,
+      "status": "FAIL",
+      "scope": "checker self-test, not memory-order bug"
+    },
+    "invalid_configuration": {
+      "returncode": 2
+    },
+    "conditions": [
+      "exactly one producer and one consumer",
+      "quiescent initialization and destruction",
+      "all pthread_create calls succeed"
+    ],
+    "invariants": [
+      "FIFO sequence 1..N and per-element checksum",
+      "produced=consumed=N",
+      "all four final indexes=(initial+N) mod 2^32",
+      "empty and full boundary API behavior"
+    ]
+  },
+  "projections": {
+    "publication.relaxed": {
+      "x86": "Never",
+      "riscv": "Sometimes"
+    },
+    "publication.ordered": {
+      "x86": "Never",
+      "riscv": "Never"
+    },
+    "recycling.relaxed": {
+      "x86": "Never",
+      "riscv": "Sometimes"
+    },
+    "recycling.ordered": {
+      "x86": "Never",
+      "riscv": "Never"
+    }
+  },
+  "review_file": "reviews.json",
+  "language_scope": "C11 原子接口及项目明确选择的 DPDK C11 分支；原生编译环境与手工架构映射分别记录",
+  "references": {
+    "C11": {
+      "title": "C11 委员会草案 N1570",
+      "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+      "version": "N1570, 2011-04-12",
+      "sections": "§5.1.2.4 p11 release/acquire、p18 happens-before、p25 数据竞争；§6.2.5 p9 unsigned 模运算；§7.17.3 原子内存序"
+    },
+    "RVWMO": {
+      "title": "RISC-V RVWMO Explanatory Material",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/mm-eplan.html",
+      "version": "ISA v20260120；说明版本 0.1",
+      "sections": "§37.1.3.6 Fences；Table 16 C/C++ mappings；本文手工投影仅采用普通内存 Load/Store 映射"
+    },
+    "X86_MODEL": {
+      "title": "herdtools7 x86tso.cat",
+      "url": "https://github.com/herd/herdtools7/blob/7.58/herd/libdir/x86tso.cat",
+      "version": "herdtools7 7.58；本次实际模型及 include 闭包哈希以 result.json 为准",
+      "sections": "x86tso.cat 的保序与一致性约束；本项目 model/*.x86.litmus 的目标条件"
+    },
+    "DPDK": {
+      "title": "DPDK 固定版本源码",
+      "url": "https://github.com/DPDK/dpdk/blob/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/ring/rte_ring_c11_pvt.h",
+      "version": "v24.11 / 1b3bf1128d9bda5595861814792f74b8f57160c8",
+      "sections": "source_anchors 对应函数；vendor/manifest.json 固定原始文件哈希；provenance.md 记录改动"
+    },
+    "RVWMO_SPEC": {
+      "title": "RVWMO Memory Consistency Model",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/rvwmo.html",
+      "version": "ISA v20260120；RVWMO 2.0",
+      "sections": "§17.1.1 global memory order、preserved program order 与相关内存模型公理；不涵盖 I/O"
+    }
+  },
+  "obligations": [
+    {
+      "id": "B01-PUB",
+      "requirement": "发布后的元素读取应观察对应载荷",
+      "preconditions": [
+        "单生产者、单消费者；静止初始化",
+        "消费者 acquire 观察到覆盖目标槽位的 release 发布，初始位置和代次一致"
+      ],
+      "allowed": [
+        "尚未发布时出队返回空并重试",
+        "消费者观察更晚的已发布批次"
+      ],
+      "forbidden": [
+        "读取已发布序号时获得旧值、未初始化值或损坏载荷"
+      ],
+      "risk": "弱化 prod.tail 的发布或接收排序，会失去载荷写到读的同步依据",
+      "reasoning": "同一槽位代次 g：W(payload_g) sequenced-before release W(prod.tail=t)；消费者 acquire R(prod.tail) 读取覆盖该消息的发布 t，再执行 R(payload_g)。对应发布与接收 synchronizes-with，故 W(payload_g) happens-before R(payload_g)。更晚批次只有确实覆盖该消息才可作为发布依据；覆写安全还依赖 B01-RECYCLE。",
+      "references": [
+        "C11",
+        "DPDK",
+        "RVWMO",
+        "X86_MODEL",
+        "RVWMO_SPEC"
+      ],
+      "source_anchors": [
+        {
+          "path": "vendor/dpdk/rte_ring_c11_pvt.h",
+          "symbol": "__rte_ring_update_tail"
+        },
+        {
+          "path": "vendor/dpdk/rte_ring_c11_pvt.h",
+          "symbol": "__rte_ring_move_cons_head"
+        },
+        {
+          "path": "vendor/dpdk/rte_ring_elem_pvt.h",
+          "symbol": "__rte_ring_do_enqueue_elem"
+        },
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "consumer"
+        }
+      ],
+      "native_kinds": [],
+      "native_scope": "没有能够独立判定本义务的原生检查；依据为源码推导或局部投影",
+      "projection_checks": [
+        "publication.relaxed",
+        "publication.ordered"
+      ],
+      "remaining_gaps": [
+        "投影省略 head、数组寻址、批量及循环",
+        "完整多轮发布关系与编译器映射尚未验证"
+      ],
+      "next_action": "按 oracle.md 的 P1-P4 与目标条件评审局部投影；继续补齐有界数组、批量、控制流与编译器映射"
+    },
+    {
+      "id": "B01-RECYCLE",
+      "requirement": "消费者读取完成后才允许生产者复用槽位",
+      "preconditions": [
+        "生产者 acquire 观察覆盖目标槽位的 cons.tail 归还",
+        "容量和 head 预留正确；同一槽位代次明确"
+      ],
+      "allowed": [
+        "队列满时入队返回 0 并重试",
+        "槽位归还后写入下一条消息"
+      ],
+      "forbidden": [
+        "消费者尚未完成复制时槽位已被覆写"
+      ],
+      "risk": "仅保证发布方向不足以保护槽位的下一轮写入；归还方向也需要读到写的顺序",
+      "reasoning": "同一物理槽位的相邻代次 g 与 g+1：R(payload_g) sequenced-before release W(cons.tail=u)；生产者 acquire R(cons.tail) 读取覆盖该槽位的归还 u，再执行 W(payload_g+1)。对应归还建立 synchronizes-with，故旧代读取 happens-before 新代覆写。新代按物理 size 间隔复用，而 capacity=size-1。消费者在队列函数中已复制到私有 data[8] 后归还，返回驱动后继续核对私有副本不再占用槽位。",
+      "references": [
+        "C11",
+        "DPDK",
+        "RVWMO",
+        "X86_MODEL",
+        "RVWMO_SPEC"
+      ],
+      "source_anchors": [
+        {
+          "path": "vendor/dpdk/rte_ring_c11_pvt.h",
+          "symbol": "__rte_ring_move_prod_head"
+        },
+        {
+          "path": "vendor/dpdk/rte_ring_c11_pvt.h",
+          "symbol": "__rte_ring_update_tail"
+        },
+        {
+          "path": "vendor/dpdk/rte_ring_elem_pvt.h",
+          "symbol": "__rte_ring_do_dequeue_elem"
+        }
+      ],
+      "native_kinds": [],
+      "native_scope": "没有能够独立判定本义务的原生检查；依据为源码推导或局部投影",
+      "projection_checks": [
+        "recycling.relaxed",
+        "recycling.ordered"
+      ],
+      "remaining_gaps": [
+        "一槽位投影省略索引代次与模运算",
+        "不能由该投影推出完整队列无数据竞争"
+      ],
+      "next_action": "按 oracle.md 的 R1-R4 复核读后归还和接收后覆写；补齐多轮物理槽位与逻辑代次的对应"
+    },
+    {
+      "id": "B01-FIFO",
+      "requirement": "消息无丢失重复乱序且最终索引一致",
+      "preconditions": [
+        "消息序号 1..N，N<=10000000",
+        "四索引初始相同；uint32 索引按模 2^32 运算；合法容量和批量"
+      ],
+      "allowed": [
+        "不同的 enqueue/dequeue 批量切分",
+        "不同的等待次数及复制环绕次数"
+      ],
+      "forbidden": [
+        "逐条载荷与 message(next+i) 不同",
+        "produced 或 consumed 不等于 N；任一最终索引不同于 (initial+N) mod 2^32"
+      ],
+      "risk": "错误的容量、复制边界或索引运算可导致丢失、覆写和乱序；最终计数正确也可能掩盖消息错误",
+      "reasoning": "消费者记录复制所得的原始 uint64 值；main 在 join 后导出轨迹，Python 不调用 C message()，按序号 1..N 分拆高低 32 位、独立计算校验并检查条数。runner 另按命令参数检查 produced/consumed 和四个最终索引。可发现共享 message() 编码错误；只能判定本次有界轨迹，不能独立诊断发布或复用失败原因。",
+      "references": [
+        "C11",
+        "DPDK"
+      ],
+      "source_anchors": [
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "message"
+        },
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "consumer"
+        },
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "bool ok"
+        },
+        {
+          "path": "vendor/dpdk/rte_ring_elem_pvt.h",
+          "symbol": "__rte_ring_enqueue_elems_64"
+        },
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "write_trace"
+        },
+        {
+          "path": "scripts/fifo_oracle.py",
+          "symbol": "check_trace"
+        }
+      ],
+      "native_kinds": [
+        "baseline"
+      ],
+      "native_scope": "程序内逐条断言、Python 独立消息轨迹检查和最终计数/四索引检查；覆盖本次参数与实际调度",
+      "projection_checks": [],
+      "remaining_gaps": [
+        "原生检查不穷尽全部交错、容量与循环次数",
+        "publication/recycling 投影不证明 FIFO"
+      ],
+      "next_action": "复核固定消息向量与各类错误轨迹拒绝结果；后续增加有界多轮状态关系验证"
+    },
+    {
+      "id": "B01-BOUNDARY",
+      "requirement": "空满边界和对象生命周期满足使用前提",
+      "preconditions": [
+        "size 为 2..65536 的二次幂；capacity=size-1；1<=batch<=min(8,capacity)",
+        "初始化及销毁时无工作线程访问；pthread 创建和 join 成功"
+      ],
+      "allowed": [
+        "空队列出队 0；满队列入队 0",
+        "非法参数返回 2"
+      ],
+      "forbidden": [
+        "顺序 preflight 接受越界操作或破坏排空顺序",
+        "线程仍在访问时 reset 或 free"
+      ],
+      "risk": "不合法配置或生命周期可使内存序分析的前提失效",
+      "reasoning": "preflight 在启动线程前执行空出队、capacity 次单元素入队、满入队拒绝、逐条排空及再次空出队；随后静止 reset，join 后才读取统计和 free。runner 用非法配置返回码检查参数边界。当前没有独立的全生命周期动态检查；并发空满仍依赖容量及所有权算法。",
+      "references": [
+        "C11",
+        "DPDK"
+      ],
+      "source_anchors": [
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "preflight"
+        },
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "reset"
+        },
+        {
+          "path": "B01_spsc_ring/benchmark.c",
+          "symbol": "pthread_join"
+        }
+      ],
+      "native_kinds": [
+        "baseline",
+        "invalid_configuration"
+      ],
+      "native_scope": "有界工作负载及程序内断言；不覆盖全部线程交错",
+      "projection_checks": [],
+      "remaining_gaps": [
+        "顺序边界检查不证明所有并发边界",
+        "分配及线程失败按环境错误处理，不作为算法正确证据"
+      ],
+      "next_action": "核对生命周期与错误退出路径；扩大配置覆盖时记录实际边界"
+    }
+  ],
+  "variants": {
+    "baseline": {
+      "role": "上游算法与本地工作负载的正确实现对照；B01 默认回归额外保存消费轨迹并由独立 Python 公式逐条复核",
+      "limitation": "本次参数与调度下的有界行为检查，不是完整程序证明"
+    },
+    "checker_corruption": {
+      "role": "BENCH_INJECT_CORRUPTION 人工破坏载荷或校验值，程序预期 FAIL/1，回归比较预期 PASS",
+      "limitation": "仅证明检查器能检测该损坏；不是内存序漏洞或上游历史缺陷"
+    },
+    "relaxed": {
+      "role": "人工删除硬件投影排序约束的问题对照",
+      "limitation": "仅投影事件；x86 保留 MOV 的架构顺序，relaxed 与 ordered 可得到相同结论"
+    },
+    "ordered": {
+      "role": "人工恢复指定发布与接收顺序的修复对照",
+      "limitation": "仅对应局部排序义务；不包含被省略的完整算法语义"
+    },
+    "source_problem_fix": {
+      "role": "源码级内存序问题版及修复版尚未提供",
+      "limitation": "弱化普通载荷同步可能导致 C11 数据竞争；不使用该原生运行作为可靠的架构行为依据"
+    }
+  },
+  "fifo_contract": {
+    "trace_schema": "b01-fifo-trace-1",
+    "sequence_start": 1,
+    "checksum_multiplier": 2654435761,
+    "checksum_xor": 2779077210,
+    "sequence_shift": 32,
+    "checksum_modulus": 4294967296
+  }
+}

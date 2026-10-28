@@ -1,0 +1,125 @@
+{
+  "schema": "correctness-catalog-1",
+  "cases": [
+    {
+      "id": "C01_global",
+      "suite": "internal",
+      "source": "cases/C01_global/case.c",
+      "oracle": "cases/C01_global/expected.json",
+      "explanation": "cases/C01_global/expected.md",
+      "requirement": "全局共享对象身份、初值及两个访问事件完整一致",
+      "architecture_oracle": "cases/C01_global/architecture.json",
+      "architecture_explanation": "cases/C01_global/architecture.md"
+    },
+    {
+      "id": "C02_thread_argument",
+      "suite": "internal",
+      "source": "cases/C02_thread_argument/case.c",
+      "oracle": "cases/C02_thread_argument/expected.json",
+      "explanation": "cases/C02_thread_argument/expected.md",
+      "requirement": "线程参数传播到同一局部共享对象并保留绑定",
+      "architecture_oracle": "cases/C02_thread_argument/architecture.json",
+      "architecture_explanation": "cases/C02_thread_argument/architecture.md"
+    },
+    {
+      "id": "C03_heap_escape",
+      "suite": "internal",
+      "source": "cases/C03_heap_escape/case.c",
+      "oracle": "cases/C03_heap_escape/expected.json",
+      "explanation": "cases/C03_heap_escape/expected.md",
+      "requirement": "保留堆分配点、成功路径、初值与对象生命周期前提",
+      "architecture_oracle": "cases/C03_heap_escape/architecture.json",
+      "architecture_explanation": "cases/C03_heap_escape/architecture.md"
+    },
+    {
+      "id": "C04_struct_fields",
+      "suite": "internal",
+      "source": "cases/C04_struct_fields/case.c",
+      "oracle": "cases/C04_struct_fields/expected.json",
+      "explanation": "cases/C04_struct_fields/expected.md",
+      "requirement": "区分 data/flag 字段对象及各线程事件顺序",
+      "architecture_oracle": "cases/C04_struct_fields/architecture.json",
+      "architecture_explanation": "cases/C04_struct_fields/architecture.md"
+    },
+    {
+      "id": "C05_pointer_alias",
+      "suite": "internal",
+      "source": "cases/C05_pointer_alias/case.c",
+      "oracle": "cases/C05_pointer_alias/expected.json",
+      "explanation": "cases/C05_pointer_alias/expected.md",
+      "requirement": "合并指向同一字段的别名并排除未访问 padding",
+      "architecture_oracle": "cases/C05_pointer_alias/architecture.json",
+      "architecture_explanation": "cases/C05_pointer_alias/architecture.md"
+    },
+    {
+      "id": "C06_helper_function",
+      "suite": "internal",
+      "source": "cases/C06_helper_function/case.c",
+      "oracle": "cases/C06_helper_function/expected.json",
+      "explanation": "cases/C06_helper_function/expected.md",
+      "requirement": "将 helper 事件归入对应线程并保留必要调用",
+      "architecture_oracle": "cases/C06_helper_function/architecture.json",
+      "architecture_explanation": "cases/C06_helper_function/architecture.md"
+    },
+    {
+      "id": "C07_two_objects",
+      "suite": "internal",
+      "source": "cases/C07_two_objects/case.c",
+      "oracle": "cases/C07_two_objects/expected.json",
+      "explanation": "cases/C07_two_objects/expected.md",
+      "requirement": "由 flag 扩展保留 data 及双对象顺序和潜在通信关系",
+      "architecture_oracle": "cases/C07_two_objects/architecture.json",
+      "architecture_explanation": "cases/C07_two_objects/architecture.md"
+    },
+    {
+      "id": "C08_unrelated_code",
+      "suite": "internal",
+      "source": "cases/C08_unrelated_code/case.c",
+      "oracle": "cases/C08_unrelated_code/expected.json",
+      "explanation": "cases/C08_unrelated_code/expected.md",
+      "requirement": "删除已抽取的 noise 后目标单元与 C07 等价",
+      "architecture_oracle": "cases/C08_unrelated_code/architecture.json",
+      "architecture_explanation": "cases/C08_unrelated_code/architecture.md"
+    },
+    {
+      "id": "P01_pthread_sb",
+      "suite": "prototype",
+      "source": "cases/P01_pthread_sb/case.c",
+      "oracle": "cases/P01_pthread_sb/expected.json",
+      "explanation": "cases/P01_pthread_sb/expected.md",
+      "requirement": "保留 SB 四事件并删除 private_noise；两架构目标预期 Sometimes"
+    },
+    {
+      "id": "P02_atomic_fence",
+      "suite": "prototype",
+      "source": "cases/P02_atomic_fence/case.c",
+      "oracle": "cases/P02_atomic_fence/expected.json",
+      "explanation": "cases/P02_atomic_fence/expected.md",
+      "requirement": "保留两个 seq_cst fence；目标预期 Never；删除 fence 的 SB 对照恢复 Sometimes"
+    },
+    {
+      "id": "P03_release_acquire_relay",
+      "suite": "prototype",
+      "source": "cases/P03_release_acquire_relay/case.c",
+      "oracle": "cases/P03_release_acquire_relay/expected.json",
+      "explanation": "cases/P03_release_acquire_relay/expected.md",
+      "requirement": "保留三线程同步、helper 与读到写值依赖；传递成功却读旧 data 的目标预期 Never"
+    },
+    {
+      "id": "B01_spsc_ring",
+      "suite": "benchmarks",
+      "source": "benchmarks/B01_spsc_ring/benchmark.c",
+      "oracle": "benchmarks/B01_spsc_ring/oracle.json",
+      "explanation": "benchmarks/B01_spsc_ring/oracle.md",
+      "requirement": "按 oracle.json 中的逐项正确性义务检查行为与局部架构投影"
+    },
+    {
+      "id": "B02_spinlock",
+      "suite": "benchmarks",
+      "source": "benchmarks/B02_spinlock/benchmark.c",
+      "oracle": "benchmarks/B02_spinlock/oracle.json",
+      "explanation": "benchmarks/B02_spinlock/oracle.md",
+      "requirement": "按 oracle.json 中的逐项正确性义务检查行为与局部架构投影"
+    }
+  ]
+}

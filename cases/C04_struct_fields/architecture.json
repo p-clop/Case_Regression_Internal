@@ -1,0 +1,215 @@
+{
+  "schema": "c-architecture-oracle-1",
+  "case": "C04_struct_fields",
+  "family": "message_passing",
+  "scope": "explicit_32bit_hardware_projection",
+  "source_sha256": "847a584ee999df3c8bdf744e8c7e438ac642b6591c4972059a9b22023fad128f",
+  "structure_oracle_sha256": "30587fd42e85a871125a5fc6d944287cc10c73650877bb1345cd23762027877e",
+  "c_program_correctness": "UNKNOWN",
+  "assumptions": [
+    "两个worker各执行一次；pthread创建成功；初始化在启动前完成，join位于投影之外",
+    "将保留的普通int访问显式映射为对齐、互不重叠的32位普通架构访存",
+    "按原访存程序顺序保留事件；不引入编译器优化、额外依赖、同步或确定的reads-from边",
+    "原始C普通跨线程冲突访问可能构成数据竞争，仅验证硬件投影，不执行原始C推断语言行为"
+  ],
+  "projections": {
+    "slice": {
+      "objects": [
+        {
+          "id": "state.data",
+          "symbol": "data",
+          "initial": 0
+        },
+        {
+          "id": "state.flag",
+          "symbol": "flag",
+          "initial": 0
+        }
+      ],
+      "threads": [
+        {
+          "index": 0,
+          "entry": "writer",
+          "events": [
+            {
+              "id": "T0:E0",
+              "kind": "Store",
+              "object": "state.data",
+              "ordering": "plain",
+              "value": 1
+            },
+            {
+              "id": "T0:E1",
+              "kind": "Store",
+              "object": "state.flag",
+              "ordering": "plain",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "entry": "reader",
+          "events": [
+            {
+              "id": "T1:E0",
+              "kind": "Load",
+              "object": "state.flag",
+              "ordering": "plain"
+            },
+            {
+              "id": "T1:E1",
+              "kind": "Load",
+              "object": "state.data",
+              "ordering": "plain"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "variants": {
+    "plain": {
+      "projection": "slice",
+      "fences": []
+    },
+    "fenced": {
+      "projection": "slice",
+      "fences": [
+        {
+          "thread": 0,
+          "after": "T0:E0",
+          "ordering": "release"
+        },
+        {
+          "thread": 1,
+          "after": "T1:E0",
+          "ordering": "acquire"
+        }
+      ]
+    }
+  },
+  "queries": [
+    {
+      "id": "stale_payload",
+      "variant": "plain",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 1
+        },
+        {
+          "thread": 1,
+          "event": "T1:E1",
+          "value": 0
+        }
+      ],
+      "expected": {
+        "x86": "Never",
+        "riscv": "Sometimes"
+      },
+      "reasoning": "令a=W(data,1)、b=W(flag,1)、c=R(flag,1)、d=R(data,0)。TSO保留a<b和c<d；flag=1来自b，旧data=0在本投影要求d先于唯一非初始写a，形成a<b<c<d<a的矛盾。无屏障无依赖的RVWMO不要求这两段跨地址普通访存保序，b,c,d,a是允许目标的候选全局序；对应CAT用于复核。"
+    },
+    {
+      "id": "published_payload",
+      "variant": "plain",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 1
+        },
+        {
+          "thread": 1,
+          "event": "T1:E1",
+          "value": 1
+        }
+      ],
+      "expected": {
+        "x86": "Sometimes",
+        "riscv": "Sometimes"
+      },
+      "reasoning": "writer全部完成后reader读取为(1,1)可行，reader先执行又有其他结果；不是Always。"
+    },
+    {
+      "id": "unwritten_value",
+      "variant": "plain",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 1
+        },
+        {
+          "thread": 1,
+          "event": "T1:E1",
+          "value": 2
+        }
+      ],
+      "expected": {
+        "x86": "Never",
+        "riscv": "Never"
+      },
+      "reasoning": "data只由初始化写0及writer写1提供值，没有可供读取的值2。"
+    },
+    {
+      "id": "fenced_stale_payload",
+      "variant": "fenced",
+      "target": [
+        {
+          "thread": 1,
+          "event": "T1:E0",
+          "value": 1
+        },
+        {
+          "thread": 1,
+          "event": "T1:E1",
+          "value": 0
+        }
+      ],
+      "expected": {
+        "x86": "Never",
+        "riscv": "Never"
+      },
+      "reasoning": "手工对照在writer两次写之间加release fence，在reader两次读之间加acquire fence；RISC-V对应fence rw,w与fence r,rw，恢复两侧所需顺序，禁止目标。x86原本保序，映射无需额外指令。"
+    }
+  ],
+  "references": [
+    {
+      "id": "C11",
+      "url": "https://www.open-std.org/jtc1/sc22/WG14/www/docs/n1570.pdf",
+      "version": "N1570 2011-04-12",
+      "scope": "§5.1.2.4 p25 数据竞争；不把硬件投影当作原始C行为"
+    },
+    {
+      "id": "RVWMO_AXIOMS",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/rvwmo.html",
+      "version": "ISA v20260120, RVWMO 2.0",
+      "scope": "§17.1.1 preserved program order、Load Value Axiom与Coherence约束；解释材料与规范正文分开"
+    },
+    {
+      "id": "RVWMO",
+      "url": "https://docs.riscv.org/reference/isa/v20260120/unpriv/mm-eplan.html",
+      "version": "ISA v20260120, explanation 0.1",
+      "scope": "§37.1.3 的保序、读值和fence；Table 16 普通访问及屏障映射"
+    },
+    {
+      "id": "X86_TSO",
+      "url": "https://github.com/herd/herdtools7/blob/7.58/herd/libdir/x86tso.cat",
+      "version": "herdtools7 7.58",
+      "scope": "固定模型的读值与保序约束；实际CAT及include版本另存"
+    },
+    {
+      "id": "HERD",
+      "url": "https://diy.inria.fr/doc/herd.html",
+      "version": "herd7 manual",
+      "scope": "Observation针对明确的litmus目标与模型，不表示原生频率"
+    }
+  ],
+  "remaining_gaps": [
+    "尚无正式团队架构Oracle审查记录",
+    "未验证完整C语言数据竞争语义或任意编译器的C-to-ISA映射",
+    "有限直线硬件投影不代表完整前端集成或任意程序切片正确"
+  ]
+}

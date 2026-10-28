@@ -29,7 +29,7 @@ Clang 安装沿用 [原型环境说明](README_prototype.md)。这个结构回�
 - 每例的 `result.json`：本次运行状态、来源哈希、实际产物哈希、错误原因及额外等价检查。
 
 结构结果为 PASS/0、FAIL/1、UNKNOWN/2。FAIL 表示与独立 Oracle 不匹配；UNKNOWN 表示缺少工具、输入能力不支持、Oracle 无效、输出缺失或来源校验未通过。
-八个 Case 的 `verification.x86.status` 和 `verification.riscv.status` 保持 UNKNOWN，原因为 `no_reviewed_model_oracle`。
+本结构入口的 `verification.x86.status` 和 `verification.riscv.status` 保持 UNKNOWN，原因为 `architecture_checked_by_separate_runner`。新增架构判据位于各例 `architecture.json`，执行 `bash scripts/run_c_architecture.sh`；模型比较与正式审查分别记录，见 [C系列架构说明](C_ARCHITECTURE.md)。
 这里的结构 PASS 不代表模型验证通过，也不改变原始普通 C 共享变量可能存在数据竞争的事实。
 
 ## 比较内容

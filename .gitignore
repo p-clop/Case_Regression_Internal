@@ -5,3 +5,10 @@ __pycache__/
 
 # 临时回归输出（可重新生成，不入库）
 results/verify_now/
+results/correctness/
+results/c_architecture/
+results/benchmarks/
+results/review_*/
+
+# 各类结果目录中的构建二进制均可重建
+results/**/bin/

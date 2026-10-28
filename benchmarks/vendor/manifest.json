@@ -1,0 +1,51 @@
+{
+  "repository": "https://github.com/DPDK/dpdk",
+  "tag": "v24.11",
+  "tag_object": "8f7a46c40b38c1dd39badc3d035e38dd8a6f3ea0",
+  "commit": "1b3bf1128d9bda5595861814792f74b8f57160c8",
+  "license": "BSD-3-Clause",
+  "files": [
+    {
+      "upstream_path": "lib/ring/rte_ring_c11_pvt.h",
+      "local_path": "vendor/dpdk/rte_ring_c11_pvt.h",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/ring/rte_ring_c11_pvt.h",
+      "sha256": "6644fa33ee2041c6726e54260859c025c872c2b02bfbdd699895d461349cafb7"
+    },
+    {
+      "upstream_path": "lib/ring/rte_ring_elem_pvt.h",
+      "local_path": "vendor/dpdk/rte_ring_elem_pvt.h",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/ring/rte_ring_elem_pvt.h",
+      "sha256": "ee562668f69fb5152fd733beafb3e7eec411c404b186cfd45bc66fbb72367950"
+    },
+    {
+      "upstream_path": "lib/ring/rte_ring_core.h",
+      "local_path": "vendor/dpdk/rte_ring_core.h",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/ring/rte_ring_core.h",
+      "sha256": "b35c8fdcccae803d86c5e9bff508dc9746fb4e8b8b3d6fa2bd05c6b17a81fe9d"
+    },
+    {
+      "upstream_path": "lib/eal/include/generic/rte_spinlock.h",
+      "local_path": "vendor/dpdk/rte_spinlock.h",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/eal/include/generic/rte_spinlock.h",
+      "sha256": "9ccac7a5c0b3527733d4058d03ebdadc83ea487c6e82152c88fa882e155773c3"
+    },
+    {
+      "upstream_path": "lib/eal/include/rte_stdatomic.h",
+      "local_path": "vendor/dpdk/rte_stdatomic.h",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/eal/include/rte_stdatomic.h",
+      "sha256": "da186f45b914522fe510adfeffe5004c626e0bdcfeff3abe10811c48082b3113"
+    },
+    {
+      "upstream_path": "lib/eal/include/generic/rte_pause.h",
+      "local_path": "vendor/dpdk/rte_pause.h",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/lib/eal/include/generic/rte_pause.h",
+      "sha256": "3753ef5304bca5cb95fec41b30ff49989d1d3da63264ceb902dbae4b2bb81590"
+    },
+    {
+      "upstream_path": "license/bsd-3-clause.txt",
+      "local_path": "vendor/dpdk/bsd-3-clause.txt",
+      "url": "https://raw.githubusercontent.com/DPDK/dpdk/1b3bf1128d9bda5595861814792f74b8f57160c8/license/bsd-3-clause.txt",
+      "sha256": "9acc4bc871a4742550158e3696dcb381953172ef808d04ca248184f9f6322712"
+    }
+  ]
+}

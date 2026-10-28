@@ -1,0 +1,12 @@
+X86 B02_spinlock_handoff_relaxed_x86
+
+{
+  data=0;
+  tail=1;
+}
+
+P0 | P1 ;
+MOV [data],$1 | MOV EAX,[tail] ;
+MOV [tail],$0 | MOV EBX,[data] ;
+
+exists (1:EAX=0 /\ 1:EBX=0)
