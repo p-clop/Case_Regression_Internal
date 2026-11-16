@@ -1,0 +1,24 @@
+{
+  "scope": "Manually specified relaxed-atomic SB hardware projection; pipeline control only, outside the thirteen-case catalog.",
+  "structure": {
+    "objects": [{"id": "x", "initial": 0}, {"id": "y", "initial": 0}],
+    "threads": [
+      {"entry": "writer", "events": [
+        {"kind": "Store", "object": "x", "ordering": "relaxed", "value": 1},
+        {"kind": "Load", "object": "y", "ordering": "relaxed"}
+      ]},
+      {"entry": "reader", "events": [
+        {"kind": "Store", "object": "y", "ordering": "relaxed", "value": 1},
+        {"kind": "Load", "object": "x", "ordering": "relaxed"}
+      ]}
+    ]
+  },
+  "program_order": [["T0:E0", "T0:E1"], ["T1:E0", "T1:E1"]],
+  "units": [{"objects": ["x", "y"], "event_ids": ["T0:E0", "T0:E1", "T1:E0", "T1:E1"]}],
+  "outcomes": [
+    {"outcome": {"r0": 0, "r1": 0}, "x86": "Sometimes", "riscv": "Sometimes"},
+    {"outcome": {"r0": 0, "r1": 1}, "x86": "Sometimes", "riscv": "Sometimes"},
+    {"outcome": {"r0": 1, "r1": 0}, "x86": "Sometimes", "riscv": "Sometimes"},
+    {"outcome": {"r0": 1, "r1": 1}, "x86": "Sometimes", "riscv": "Sometimes"}
+  ]
+}

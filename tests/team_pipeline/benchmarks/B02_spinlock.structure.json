@@ -1,0 +1,140 @@
+{
+  "schema": "benchmark-structure-requirements-1",
+  "case": "B02_spinlock",
+  "authorship": "Manually specified from original C and pinned DPDK sources; never generated from team paths. Unreviewed draft.",
+  "review_status": "DRAFT_UNREVIEWED",
+  "comparison_scope": "Full requirements are not an executable complete-program oracle; executable region checks are separate.",
+  "instances": [
+    {
+      "id": "worker[0]",
+      "entry": "worker",
+      "argument": "&states[0]",
+      "handle": "threads[0]"
+    },
+    {
+      "id": "worker[1]",
+      "entry": "worker",
+      "argument": "&states[1]",
+      "handle": "threads[1]"
+    }
+  ],
+  "objects": {
+    "ctx.lock.locked": {
+      "type": "I32",
+      "atomic": true,
+      "initial": 0
+    },
+    "ctx.record.count": {
+      "type": "U64",
+      "atomic": false,
+      "initial": 0
+    },
+    "ctx.record.checksum": {
+      "type": "U64",
+      "atomic": false,
+      "initial": 6510698343141591806
+    },
+    "ctx.gate.ready": {
+      "type": "U32",
+      "atomic": true,
+      "initial": 0
+    },
+    "ctx.gate.go": {
+      "type": "Bool",
+      "atomic": true,
+      "initial": 0
+    }
+  },
+  "required_paths": [
+    "main argv validation and checked initialization",
+    "preflight trylock success then failure and unlock",
+    "both workers increment ready and await go",
+    "first CAS success",
+    "failed CAS writes actual lock value to exp",
+    "relaxed wait may repeat before reading zero",
+    "reset exp=0 before every retry",
+    "CAS success enters record update",
+    "invalid record branches to error and unlock before break",
+    "successful update records before/after and completed++",
+    "unlock and repeat worker iterations",
+    "joins before trace reads and final checks",
+    "allocation and pthread failures as environment errors"
+  ],
+  "obligations": {
+    "B02-MUTEX": {
+      "required": [
+        "CAS is indivisible; strong success iff read equals expected",
+        "all concurrent lock CAS expect 0 and desire 1",
+        "failure has no lock write and updates exp",
+        "wait completion does not imply ownership",
+        "exp reset occurs after wait and before retry",
+        "record accesses bracketed by matching successful lock/release",
+        "two worker instances share one lock"
+      ],
+      "current_regions": [
+        "worker0_lock",
+        "worker1_lock"
+      ],
+      "remaining": [
+        "worker/main extraction",
+        "thread composition",
+        "CAS feasibility",
+        "RMW closure",
+        "ISA atomic lowering"
+      ]
+    },
+    "B02-HANDOFF": {
+      "required": [
+        "unlock release Store locked=0",
+        "next winner uses acquire CAS",
+        "record count/checksum accesses retain source and data dependencies"
+      ],
+      "current_regions": [
+        "worker0_unlock",
+        "worker1_unlock"
+      ],
+      "remaining": [
+        "record expressions",
+        "cross-thread ownership and communication",
+        "hardware models"
+      ]
+    },
+    "B02-RECORD": {
+      "required": [
+        "U64 count increment modulo 2^64",
+        "checksum=(count*11400714819323198485 mod 2^64) xor 6510698343141591806",
+        "before/after observations belong to individual worker allocation",
+        "join precedes reading private buffers"
+      ],
+      "current_regions": [
+        "record_checksum"
+      ],
+      "remaining": [
+        "update_record extraction",
+        "observation arrays",
+        "joins and full property"
+      ]
+    },
+    "B02-BOUNDARY": {
+      "required": [
+        "quiescent trylock has success and failure",
+        "two CAS attempts are distinct from two work iterations",
+        "every wait condition read counted",
+        "live successor at limit remains BOUNDARY",
+        "budget exhaustion cannot become complete PASS"
+      ],
+      "current_regions": [
+        "worker0_trylock",
+        "worker1_trylock",
+        "worker0_startup",
+        "worker1_startup",
+        "main_release"
+      ],
+      "remaining": [
+        "main preflight execution",
+        "all worker loop bounds",
+        "whole path coverage"
+      ]
+    }
+  }
+}

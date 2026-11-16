@@ -1,0 +1,125 @@
+{
+  "schema": "benchmark-structure-requirements-1",
+  "case": "B01_spsc_ring",
+  "authorship": "Manually specified from original C and pinned DPDK sources; never generated from team paths. Unreviewed draft.",
+  "review_status": "DRAFT_UNREVIEWED",
+  "comparison_scope": "Full requirements are not an executable complete-program oracle; executable region checks are separate.",
+  "instances": [
+    {
+      "id": "producer",
+      "entry": "producer",
+      "argument": "&ctx",
+      "handle": "prod"
+    },
+    {
+      "id": "consumer",
+      "entry": "consumer",
+      "argument": "&ctx",
+      "handle": "cons"
+    }
+  ],
+  "objects": {
+    "ring.prod.head": {
+      "type": "U32",
+      "atomic": true,
+      "initial": 4294967294
+    },
+    "ring.prod.tail": {
+      "type": "U32",
+      "atomic": true,
+      "initial": 4294967294
+    },
+    "ring.cons.head": {
+      "type": "U32",
+      "atomic": true,
+      "initial": 4294967294
+    },
+    "ring.cons.tail": {
+      "type": "U32",
+      "atomic": true,
+      "initial": 4294967294
+    },
+    "ring.elements[index]": {
+      "type": "U64",
+      "atomic": false,
+      "identity": "allocation instance + byte offset + index; retain reuse generations"
+    },
+    "ctx.abort_run": {
+      "type": "Bool",
+      "atomic": true,
+      "initial": 0
+    }
+  },
+  "required_paths": [
+    "argv parsing and size/batch validation",
+    "allocation failure or initialized ring",
+    "empty/full/drain preflight then quiescent reset",
+    "start gate",
+    "producer/consumer zero-transfer wait and retry",
+    "batch lengths 1 and 2",
+    "wrapped copy crosses slots",
+    "consumer mismatch sets abort and returns",
+    "successful worker completion",
+    "join before FIFO trace and final indices"
+  ],
+  "obligations": {
+    "B01-PUB": {
+      "required": [
+        "producer data writes before release prod.tail",
+        "consumer acquire prod.tail before reading published U64 slot",
+        "same allocation/slot alias kept across calls"
+      ],
+      "current_regions": [],
+      "remaining": [
+        "arrays and layout",
+        "SP parameter propagation",
+        "copy accesses",
+        "release/acquire relation",
+        "ISA models"
+      ]
+    },
+    "B01-RECYCLE": {
+      "required": [
+        "consumer reads slot before release cons.tail",
+        "producer acquire cons.tail before reuse",
+        "slot storage identity persists across logical generations"
+      ],
+      "current_regions": [],
+      "remaining": [
+        "address/index guards",
+        "loop generations",
+        "reuse paths",
+        "ISA models"
+      ]
+    },
+    "B01-FIFO": {
+      "required": [
+        "message.sequence is U32",
+        "checksum=(sequence*2654435761 mod 2^32) xor 2779077210",
+        "message=((U64)sequence<<32)|checksum",
+        "all received slots preserve order and multiplicity"
+      ],
+      "current_regions": [],
+      "remaining": [
+        "automatic producer/consumer paths",
+        "U64 arrays and memcpy",
+        "independent full trace comparison"
+      ]
+    },
+    "B01-BOUNDARY": {
+      "required": [
+        "size=4 capacity=3 mask=3",
+        "fixed enqueue/dequeue return zero on full/empty",
+        "variable batch handles partial operations",
+        "U32 indices wrap 4294967295 to 0",
+        "SP/SC parameters 1 eliminate generic CAS only after feasible branch proof"
+      ],
+      "current_regions": [],
+      "remaining": [
+        "preflight paths",
+        "per-loop bounds",
+        "path feasibility and complete coverage"
+      ]
+    }
+  }
+}

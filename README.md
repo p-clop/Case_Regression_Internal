@@ -1,8 +1,10 @@
 # 内部 Case 草案
 
+本次代码交付的仓库分工、复现入口和未修复问题见[审阅交接说明](REVIEW_HANDOFF.md)。
+
 本目录依据《Case_Regression_新成员交接文档_20260918_更新版》建立，**不属于准公开 Team Repo**。`cases/` 中的 C 文件用于前端静态抽取和自动回归，不执行这些原始 C 程序来推断并发结果。普通变量跨线程读写可能构成 C 语言层的数据竞争；新增 `benchmarks/` 的独立运行范围见对应说明。
 
-当前 Team Repo 的 CLI 仍是受限 C 链路。本目录的独立前端已将八个原始 Case 接入自动结构回归，结果不能视作团队核心前端已完成集成。
+团队 `verification_pipeline` 已新增显式有界硬件投影模式，C01–C08、P01–P03 的原始输入可由团队实现抽取、切片并执行模型查询；结构/VU 和原始目标比较见[团队流水线集成](TEAM_PIPELINE.md)。两个 Benchmark 的完整前端和路径模型尚未完成，仍分别记录原生与局部投影证据。
 
 ## 材料索引
 
@@ -27,6 +29,8 @@
 运行后查看本地 `results/benchmarks/summary.md`，其中分别记录原生行为检查和硬件事件投影。完整程序模型验证与架构 Oracle 审查保持 UNKNOWN；本轮未接入前端自动提取。
 
 ## 八个内部 Case 的自动回归
+
+接入团队 `verification_pipeline` 的实际输入测试执行 `python3 scripts/run_team_pipeline.py`，覆盖固定十三例、独立 SB 正向控制及本次内部基线。逐例准入、流程与结果一致性分别记录，运行及证据说明见[团队流水线集成](TEAM_PIPELINE.md)。
 
 运行 `bash scripts/run_internal_regression.sh`，比较共享对象、事件、切片保留/删除、Verification Unit 和参数/别名/调用关系。
 完整输出格式与外部前端接入方式见 [自动回归说明](README_internal_regression.md)，实际结果见 [八例结果表](results/internal/summary.md)。

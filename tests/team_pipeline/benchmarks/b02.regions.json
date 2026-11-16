@@ -1,0 +1,190 @@
+{
+  "schema": "bounded-region-config-1",
+  "case": "B02_spinlock",
+  "scope": "independent_function_regions",
+  "source_files": {
+    "B02_spinlock/benchmark.c": "3de879aa9b251089140b6631615e49d578878d55b62e1d0a5754b30bab72f449",
+    "common/bench.h": "13dc8197801cd453e9e4eb8d63fb05269b9544fcf26282a9d650c998d9f18146",
+    "common/dpdk_spinlock.h": "76d029281ba021309f933a7f089026bc082ec86b88e60b744648a19d1c81a569",
+    "common/dpdk_wait.h": "881bd728c5cf92db075b24d152b90c705fadc8e1c1c587c80797eebf0a303601",
+    "common/platform.h": "b4b518bea64b9ec6e4b0107e481b9f4d5f7de54a5f87e00ea332eee208c56d6c",
+    "vendor/dpdk/rte_stdatomic.h": "da186f45b914522fe510adfeffe5004c626e0bdcfeff3abe10811c48082b3113"
+  },
+  "workload": {
+    "iterations": 2,
+    "yield_every": 0,
+    "thread_instances": 2,
+    "cas_attempts": 2,
+    "wait_reads": 4,
+    "note": "planning metadata; main and worker are not executed by region extraction"
+  },
+  "budgets": {
+    "max_paths": 128,
+    "max_events": 32,
+    "max_steps": 10000,
+    "max_call_depth": 8
+  },
+  "loops": [
+    {
+      "file": "common/dpdk_spinlock.h",
+      "sha256": "76d029281ba021309f933a7f089026bc082ec86b88e60b744648a19d1c81a569",
+      "function": "rte_spinlock_lock",
+      "line": 46,
+      "kind": "WhileStmt",
+      "max_body_executions": 1
+    },
+    {
+      "file": "common/dpdk_wait.h",
+      "sha256": "881bd728c5cf92db075b24d152b90c705fadc8e1c1c587c80797eebf0a303601",
+      "function": "rte_wait_until_equal_32",
+      "line": 14,
+      "kind": "WhileStmt",
+      "max_body_executions": 3
+    },
+    {
+      "file": "common/bench.h",
+      "sha256": "13dc8197801cd453e9e4eb8d63fb05269b9544fcf26282a9d650c998d9f18146",
+      "function": "await_start",
+      "line": 40,
+      "kind": "WhileStmt",
+      "max_body_executions": 3
+    },
+    {
+      "file": "common/bench.h",
+      "sha256": "13dc8197801cd453e9e4eb8d63fb05269b9544fcf26282a9d650c998d9f18146",
+      "function": "release_start",
+      "line": 45,
+      "kind": "WhileStmt",
+      "max_body_executions": 3
+    }
+  ],
+  "environment": {
+    "rte_pause": {
+      "effect": "private_pause_hint",
+      "file": "common/platform.h",
+      "sha256": "b4b518bea64b9ec6e4b0107e481b9f4d5f7de54a5f87e00ea332eee208c56d6c"
+    },
+    "sched_yield": {
+      "effect": "scheduler_yield_hint",
+      "file": "common/bench.h",
+      "sha256": "13dc8197801cd453e9e4eb8d63fb05269b9544fcf26282a9d650c998d9f18146"
+    }
+  },
+  "objects": {
+    "ctx.lock.locked": {
+      "type": "I32",
+      "atomic": true
+    },
+    "ctx.gate.ready": {
+      "type": "U32",
+      "atomic": true
+    },
+    "ctx.gate.go": {
+      "type": "Bool",
+      "atomic": true
+    }
+  },
+  "regions": [
+    {
+      "id": "worker0_lock",
+      "entry": "rte_spinlock_lock",
+      "instance": "worker[0]",
+      "arguments": {
+        "sl": {
+          "pointer": "ctx.lock"
+        }
+      }
+    },
+    {
+      "id": "worker0_unlock",
+      "entry": "rte_spinlock_unlock",
+      "instance": "worker[0]",
+      "arguments": {
+        "sl": {
+          "pointer": "ctx.lock"
+        }
+      }
+    },
+    {
+      "id": "worker0_trylock",
+      "entry": "rte_spinlock_trylock",
+      "instance": "worker[0]",
+      "arguments": {
+        "sl": {
+          "pointer": "ctx.lock"
+        }
+      }
+    },
+    {
+      "id": "worker0_startup",
+      "entry": "await_start",
+      "instance": "worker[0]",
+      "arguments": {
+        "gate": {
+          "pointer": "ctx.gate"
+        }
+      }
+    },
+    {
+      "id": "worker1_lock",
+      "entry": "rte_spinlock_lock",
+      "instance": "worker[1]",
+      "arguments": {
+        "sl": {
+          "pointer": "ctx.lock"
+        }
+      }
+    },
+    {
+      "id": "worker1_unlock",
+      "entry": "rte_spinlock_unlock",
+      "instance": "worker[1]",
+      "arguments": {
+        "sl": {
+          "pointer": "ctx.lock"
+        }
+      }
+    },
+    {
+      "id": "worker1_trylock",
+      "entry": "rte_spinlock_trylock",
+      "instance": "worker[1]",
+      "arguments": {
+        "sl": {
+          "pointer": "ctx.lock"
+        }
+      }
+    },
+    {
+      "id": "worker1_startup",
+      "entry": "await_start",
+      "instance": "worker[1]",
+      "arguments": {
+        "gate": {
+          "pointer": "ctx.gate"
+        }
+      }
+    },
+    {
+      "id": "main_release",
+      "entry": "release_start",
+      "instance": "main",
+      "arguments": {
+        "gate": {
+          "pointer": "ctx.gate"
+        }
+      }
+    },
+    {
+      "id": "record_checksum",
+      "entry": "checksum",
+      "instance": "formula",
+      "arguments": {
+        "count": {
+          "type": "U64",
+          "value": 4
+        }
+      }
+    }
+  ]
+}
